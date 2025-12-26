@@ -1,21 +1,31 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-//import Catalogue from './screens/Catalogue';
+//import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../App';
+//import CatalogueScreen from './Catalogue';
 
 type MenuButtonProps = {
     title: string;
     onPress?: () => void;
 };
 
+type HomeScreenNavProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
 export default function HomeScreen() {
+    const navigation = useNavigation<HomeScreenNavProp>();
+
     return (
         <View style={styles.container}>
             {/*header*/}
             <Text style={styles.header}>Welcome to the app</Text>
 
             <View style={styles.grid}>
-                <MenuButton title="Catalogue"/>
+                <MenuButton 
+                    title="Catalogue"
+                    onPress={() => navigation.navigate('Catalogue')}
+                />
                 <MenuButton title="Projects"/>
                 <MenuButton title="Cost Calculator"/>
                 <MenuButton title="Settings"/>
@@ -24,9 +34,9 @@ export default function HomeScreen() {
     );
 }
 
-function MenuButton({ title }: MenuButtonProps) {
+function MenuButton({ title, onPress = () => {} }: MenuButtonProps) {
     return (
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.7}>
             <View style={styles.iconPlaceholder}/>
             <Text style={styles.buttonText}>{title}</Text>
         </TouchableOpacity>
@@ -41,7 +51,7 @@ const styles = StyleSheet.create({
     },
     header: {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: 'bold',
         marginBottom: 30,
         borderBottomWidth: 1,
         paddingBottom: 10,
@@ -65,5 +75,6 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontSize: 14,
+        fontWeight: 'bold'
     },
 })

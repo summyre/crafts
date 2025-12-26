@@ -32,6 +32,11 @@ export default function CatalogueScreen(){
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Catalogue</Text>
+            <FlatList
+                data = {CATALOGUE_DATA}
+                keyExtractor={(item) => item.id}
+                renderItem={renderItem}
+            />
         </View>
     );
 }
