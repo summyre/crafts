@@ -26,7 +26,10 @@ export default function HomeScreen() {
                     title="Catalogue"
                     onPress={() => navigation.navigate('Catalogue')}
                 />
-                <MenuButton title="Projects"/>
+                <MenuButton 
+                    title="Projects"
+                    onPress={() => navigation.navigate('Projects')}
+                />
                 <MenuButton title="Cost Calculator"/>
                 <MenuButton title="Settings"/>
             </View>
