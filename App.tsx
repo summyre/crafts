@@ -20,7 +20,7 @@ export type RootStackParamList = {
     Projects: undefined;
     ProjectDetail: {projectId: string};
     PhotoDetail: {projectId: string; photoId: string};
-    ProjectEdit: {projectId?: string};
+    ProjectEdit: {projectId?: string} | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

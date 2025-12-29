@@ -25,7 +25,7 @@ export default function ProjectScreen() {
 
     return (
         <View style={{ flex: 1 }}>
-            <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('ProjectEdit')}>
+            <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('ProjectEdit', undefined)}>
                 <Text style={styles.createText}>+ New Project</Text>
             </TouchableOpacity>
 
