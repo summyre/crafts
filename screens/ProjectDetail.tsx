@@ -10,10 +10,9 @@ import { useProjects } from "../store/ProjectsContext";
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
 
-const navigation = useNavigation<NavProps>();
-
 export default function ProjectDetailScreen() {
     const { projectId } = useRoute<RouteProps>().params;
+    const navigation = useNavigation<NavProps>();
 
     const { projects, setProjects } = useProjects();
     const project = projects.find((p) => p.id === projectId);
