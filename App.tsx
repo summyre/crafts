@@ -9,6 +9,7 @@ import HomeScreen from './screens/HomeScreen';
 import ProjectScreen from './screens/Projects';
 import ProjectDetailScreen from './screens/ProjectDetail';
 import PhotoDetailScreen from './screens/PhotoDetail';
+import ProjectEditScreen from './screens/ProjectEdit';
 import { ProjectsProvider } from './store/ProjectsContext';
 
 enableScreens();
@@ -18,7 +19,8 @@ export type RootStackParamList = {
     Catalogue: undefined;
     Projects: undefined;
     ProjectDetail: {projectId: string};
-    PhotoDetail: {projectId: string; photoId: string;};
+    PhotoDetail: {projectId: string; photoId: string};
+    ProjectEdit: {projectId?: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -49,6 +51,10 @@ export default function App() {
               name = "PhotoDetail"
               component={PhotoDetailScreen}
               options={{ title: 'Photo' }}/>
+            <Stack.Screen
+              name = "ProjectEdit"
+              component={ProjectEditScreen}
+              options={{ title: 'Project' }}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ProjectsProvider>
