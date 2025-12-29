@@ -16,6 +16,7 @@ export type RootStackParamList = {
     Catalogue: undefined;
     Projects: undefined;
     ProjectDetail: {projectId: string};
+    PhotoDetail: {projectId: string; photoId: string;};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -41,6 +42,10 @@ export default function App() {
             name = "ProjectDetail"
             component={ProjectDetailScreen}
             options={{ title: 'Project' }}/>
+          <Stack.Screen
+            name = "PhotoDetail"
+            component={PhotoDetailScreen}
+            options={{ title: 'Photo' }}/>
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

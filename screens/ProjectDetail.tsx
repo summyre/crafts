@@ -1,9 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Alert } from 'react-native';
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
 import { PROJECTS, ProjectPhoto } from "../data/projects";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
+type NavProps = NativeStackNavigationProp<RootStackParamList>;
+
+const navigation = useNavigation<NavProps>();
 
 export default function ProjectDetailScreen() {
     const { projectId } = useRoute<RouteProps>().params;
@@ -19,8 +25,33 @@ export default function ProjectDetailScreen() {
         );
     }
 
-    const renderPhoto = ({item}: {item:ProjectPhoto}) => (
-        <TouchableOpacity style={styles.photoCard}>
+    const handleAddPhoto = async () => {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+        if (!permission.granted) {
+            Alert.alert('Permission required', 'Camera access is needed.');
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({ quality: 0.7, });
+
+        if (!result.canceled) {
+            const newPhoto: ProjectPhoto = {
+                id: Date.now().toString(),
+                uri: result.assets[0].uri,
+                createdAt: Date.now(),
+            };
+
+            setPhotos((prev) => [newPhoto, ...prev]);
+        }
+    };
+
+        const renderPhoto = ({item}: {item:ProjectPhoto}) => (
+        <TouchableOpacity 
+            style={styles.photoCard} 
+            onPress={() =>
+                navigation.navigate('PhotoDetail', {projectId, photoId: item.id,})
+            }>
             <Image source={{ uri: item.uri }} style={styles.photo}/>
         </TouchableOpacity>
     )
@@ -34,7 +65,7 @@ export default function ProjectDetailScreen() {
                 <Text style={styles.notes}>{project.notes}</Text>
             )}
 
-            <TouchableOpacity style={styles.addButton}>
+            <TouchableOpacity style={styles.addButton} onPress={handleAddPhoto}>
                 <Text style={styles.addButtonText}>+ Add Photo</Text>
             </TouchableOpacity>
 
