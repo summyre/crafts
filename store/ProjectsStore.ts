@@ -13,6 +13,7 @@ export type Project = {
     title: string;
     craftType: 'Crochet' | 'Cross Stitch';
     notes?: string;
+    //status: 'Planned' | 'In progress' | 'Completed';
     photos: ProjectPhoto[];
 };
 

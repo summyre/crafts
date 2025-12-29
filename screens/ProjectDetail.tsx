@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Alert } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
-import { PROJECTS, ProjectPhoto } from "../data/projects";
+//import { PROJECTS, ProjectPhoto } from "../data/projects";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useProjects } from "../store/ProjectsContext";
+import { ProjectPhoto } from "../store/projectsStore";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -16,6 +17,19 @@ export default function ProjectDetailScreen() {
 
     const { projects, setProjects } = useProjects();
     const project = projects.find((p) => p.id === projectId);
+
+    useEffect(() => {
+        if (!project) return;
+
+        navigation.setOptions({
+            title: project.title,
+            headerRight: () => (
+                <TouchableOpacity onPress={() => navigation.navigate('ProjectEdit', {projectId: project.id})}>
+                    <Text style={styles.editText}>Edit</Text>
+                </TouchableOpacity>
+            ),
+        });
+    }, [project?.title]);
 
     if (!project) {
         return (
@@ -46,7 +60,23 @@ export default function ProjectDetailScreen() {
 
     };
 
-        const renderPhoto = ({item}: {item:ProjectPhoto}) => (
+    const handleDeleteProject = () => {
+        Alert.alert('Delete project', 'This will delete the project and all its photos. Are you sure?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => {
+                        setProjects((prev) => prev.filter((p) => p.id !== projectId));
+                        navigation.goBack();
+                    },
+                },
+            ]
+        );
+    };
+
+    const renderPhoto = ({item}: {item:ProjectPhoto}) => (
         <TouchableOpacity 
             style={styles.photoCard} 
             onPress={() =>
@@ -78,6 +108,10 @@ export default function ProjectDetailScreen() {
                 ListEmptyComponent={
                     <Text style={styles.emptyText}>No photos yet. Add one to track progess</Text>
                 }/>
+            
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProject}>
+                <Text style={styles.deleteText}>Delete Project</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -130,5 +164,22 @@ const styles = StyleSheet.create({
     },
     addButtonText: {
         fontWeight: 'bold',
-    }
+    },
+    deleteButton: {
+        marginTop: 24,
+        padding: 14,
+        borderRadius: 10,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'red',
+    },
+    deleteText: {
+        color: 'red',
+        fontWeight: 'bold',
+    },
+    editText: {
+        color: '#444',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
 });
