@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert } fro
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
+import { useProjects } from "../store/ProjectsContext";
 import { PROJECTS, ProjectPhoto } from "../data/projects";
 
 type RouteProps = RouteProp<RootStackParamList, 'PhotoDetail'>;
@@ -11,10 +12,12 @@ type NavProps = NativeStackNavigationProp<RootStackParamList>;
 export default function PhotoDetailScreen() {
     const { projectId, photoId } = useRoute<RouteProps>().params;
     const navigation = useNavigation<NavProps>();
-    const project = PROJECTS.find((p) => p.id === projectId);
+    const { projects, setProjects } = useProjects();
+    const project = projects.find((p) => p.id === projectId);
     const photo = project?.photos.find((p) => p.id === photoId);
-    const [title, setTitle] = useState(photo?.title ?? '');
-    const [notes, setNotes] = useState(photo?.notes ?? '');
+
+    const [title, setTitle] = useState( photo?.title ?? '');
+    const [notes, setNotes] = useState( photo?.notes ?? '');
 
     if (!photo || !project) {
         return (
@@ -25,8 +28,13 @@ export default function PhotoDetailScreen() {
     }
 
     const handleSave = () => {
-        photo.title = title;
-        photo.notes = notes;
+        setProjects((prev) => prev.map((p) =>
+            p.id === projectId ? {
+                ...p, photos: p.photos.map((ph) =>
+                    ph.id === photoId ? { ...ph, title, notes }: ph),
+                } :p
+            )
+        );
         navigation.goBack();
     }
 
@@ -38,7 +46,13 @@ export default function PhotoDetailScreen() {
                 text: 'Delete',
                 style: 'destructive',
                 onPress: () => {
-                    project.photos = project.photos.filter((p) => p.id !== photoId);
+                    setProjects((prev) => prev.map((p) =>
+                        p.id === projectId ? {
+                            ...p, photos: p.photos.filter((ph) => 
+                                ph.id !== photoId),
+                            } :p
+                        )
+                    );
                     navigation.goBack();
                     },
                 },

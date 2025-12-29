@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
 import { PROJECTS, ProjectPhoto } from "../data/projects";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useProjects } from "../store/ProjectsContext";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -13,9 +14,9 @@ const navigation = useNavigation<NavProps>();
 
 export default function ProjectDetailScreen() {
     const { projectId } = useRoute<RouteProps>().params;
-    const project = PROJECTS.find((p) => p.id === projectId);
-    // local state - replace with async later
-    const [photos, setPhotos] = useState<ProjectPhoto[]>( project?.photos ?? [] );
+
+    const { projects, setProjects } = useProjects();
+    const project = projects.find((p) => p.id === projectId);
 
     if (!project) {
         return (
@@ -33,17 +34,17 @@ export default function ProjectDetailScreen() {
             return;
         }
 
-        const result = await ImagePicker.launchCameraAsync({ quality: 0.7, });
+        const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
+        if (result.canceled) return;
 
-        if (!result.canceled) {
-            const newPhoto: ProjectPhoto = {
-                id: Date.now().toString(),
-                uri: result.assets[0].uri,
-                createdAt: Date.now(),
-            };
+        const newPhoto = {
+            id: Date.now().toString(),
+            uri: result.assets[0].uri,
+            createdAt: Date.now(),
+        };
+        
+        setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, photos: [newPhoto, ...p.photos]}:p ));
 
-            setPhotos((prev) => [newPhoto, ...prev]);
-        }
     };
 
         const renderPhoto = ({item}: {item:ProjectPhoto}) => (
@@ -70,7 +71,7 @@ export default function ProjectDetailScreen() {
             </TouchableOpacity>
 
             <FlatList
-                data={photos}
+                data={project.photos}
                 keyExtractor={(item) => item.id}
                 renderItem={renderPhoto}
                 numColumns={3}
