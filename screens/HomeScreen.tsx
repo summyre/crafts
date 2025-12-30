@@ -1,10 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-//import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../App';
-//import CatalogueScreen from './Catalogue';
 
 type MenuButtonProps = {
     title: string;
@@ -23,8 +21,8 @@ export default function HomeScreen() {
 
             <View style={styles.grid}>
                 <MenuButton 
-                    title="Catalogue"
-                    onPress={() => navigation.navigate('Catalogue')}
+                    title="My Collection"
+                    onPress={() => navigation.navigate('Collection')}
                 />
                 <MenuButton 
                     title="Projects"

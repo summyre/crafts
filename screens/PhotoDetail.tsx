@@ -4,7 +4,6 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { useProjects } from "../store/ProjectsContext";
-//import { PROJECTS, ProjectPhoto } from "../data/projects";
 
 type RouteProps = RouteProp<RootStackParamList, 'PhotoDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;

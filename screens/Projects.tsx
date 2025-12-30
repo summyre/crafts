@@ -5,7 +5,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import { Project } from '../store/projectsStore';
 import { useProjects } from '../store/ProjectsContext';
-//import { PROJECTS, Project } from '../data/projects';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'Projects'>;
 

@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Alert } from
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
-//import { PROJECTS, ProjectPhoto } from "../data/projects";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useProjects } from "../store/ProjectsContext";
 import { ProjectPhoto } from "../store/projectsStore";
