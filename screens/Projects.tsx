@@ -13,15 +13,29 @@ export default function ProjectScreen() {
     const navigation = useNavigation<NavProp>();
     const { projects } = useProjects();
 
-    const renderItem = ({ item }: { item: Project }) => (
+    const renderItem = ({ item }: { item: Project }) => {
+        const coverPhoto = item.coverPhotoId ? item.photos.find((p) => p.id === item.coverPhotoId) : item.photos.at(-1);
+        const coverUri = coverPhoto?.uri;
+
+        return (
         <TouchableOpacity 
         style={styles.folder} 
         onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })
         }>
+            {coverUri ? (
+                <Image source={{uri: coverUri}} style={styles.thumbnail}/>
+            ) : (
+                <View style={styles.placeholder}>
+                    <Text style={styles.placeholderText}>No image</Text>
+                </View>
+            )}
+            
             <Text style={styles.folderTitle}>{item.title}</Text>
             {/*<Text style={styles.status}>{item.status}</Text>*/}
         </TouchableOpacity>
-    );
+
+        )
+    };
 
     return (
         <View style={{ flex: 1 }}>
@@ -79,5 +93,24 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 40,
         color: '#555',
+    },
+    thumbnail: {
+        width: '100%',
+        height: 100,
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    placeholder: {
+        width: '100%',
+        height: 100,
+        borderRadius: 8,
+        marginBottom: 8,
+        backgroundColor: '#444',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    placeholderText:{
+        color: '#888',
+        fontSize: 12,
     }
 });

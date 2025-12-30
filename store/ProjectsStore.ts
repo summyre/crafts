@@ -15,6 +15,7 @@ export type Project = {
     notes?: string;
     //status: 'Planned' | 'In progress' | 'Completed';
     photos: ProjectPhoto[];
+    coverPhotoId?: string;
 };
 
 const STORAGE_KEY = '@projects';

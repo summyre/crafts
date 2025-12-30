@@ -76,15 +76,50 @@ export default function ProjectDetailScreen() {
         );
     };
 
-    const renderPhoto = ({item}: {item:ProjectPhoto}) => (
-        <TouchableOpacity 
-            style={styles.photoCard} 
-            onPress={() =>
-                navigation.navigate('PhotoDetail', {projectId, photoId: item.id,})
-            }>
-            <Image source={{ uri: item.uri }} style={styles.photo}/>
-        </TouchableOpacity>
-    )
+    const renderPhoto = ({item}: {item:ProjectPhoto}) => {
+        const date = new Date(item.createdAt);
+
+        return (
+            <TouchableOpacity 
+                style={styles.timelineItem} 
+                onPress={() =>
+                    navigation.navigate('PhotoDetail', {projectId, photoId: item.id,})
+                }
+                onLongPress={() =>
+                    Alert.alert('Set cover photo', 'Use this photo as the project cover?',
+                        [
+                            { text: 'Cancel', style: 'cancel'},
+                            {
+                                text: 'Set as cover',
+                                onPress: () => {
+                                    setProjects((prev) => prev.map((p) =>
+                                        p.id === projectId ? { ...p, coverPhotoId: item.id } : p
+                                    ));
+                                },
+                            },
+                        ]
+                    )
+                }
+                >
+                <Image source={{ uri: item.uri }} style={styles.timelineImage}/>
+
+                <View style={styles.timelineContent}>
+                    <Text style={styles.photoTitle}>
+                        {item.title || 'Untitled session'}
+                    </Text>
+
+                    {item.notes ? ( <Text style={styles.notes} numberOfLines={3}>{item.notes}</Text> ) : null }
+
+                    <Text style={styles.timestamp}>
+                        {date.toLocaleDateString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        })}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        )
+    }
 
     return (
         <View style={styles.container}>
@@ -103,7 +138,6 @@ export default function ProjectDetailScreen() {
                 data={project.photos}
                 keyExtractor={(item) => item.id}
                 renderItem={renderPhoto}
-                numColumns={3}
                 contentContainerStyle={styles.gallery}
                 ListEmptyComponent={
                     <Text style={styles.emptyText}>No photos yet. Add one to track progess</Text>
@@ -138,6 +172,10 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
+    photoTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
     subtitle: {
         fontSize: 14,
         color: '#333',
@@ -145,7 +183,8 @@ const styles = StyleSheet.create({
     },
     notes: {
         fontSize: 14,
-        marginBottom: 12,
+        marginVertical: 4,
+        color: '#666',
     },
     addButton: {
         padding: 12,
@@ -182,4 +221,27 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
+    timelineItem: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 16,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderColor: '#333',
+    },
+    timelineImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 8,
+        marginRight: 12,
+        flexShrink: 0,
+    },
+    timelineContent: {
+        flex: 1,
+        justifyContent: 'center'
+    },
+    timestamp: {
+        fontSize: 11,
+        color: '#777',
+    }
 });
