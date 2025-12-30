@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, Image } from "react-native";
 import { useCollection } from "../store/CollectionContext";
 import { CollectionItem } from "../store/collectionStore";
 import { v4 as uuidv4 } from "uuid";
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddItemScreen({navigation}: any) {
     const { addItem } = useCollection();
@@ -16,6 +17,58 @@ export default function AddItemScreen({navigation}: any) {
         stock: 1,
         image: '',
     });
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const handleAddPhoto = async () => {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+        if (!permission.granted) {
+            Alert.alert('Permission required', 'Camera access is needed.');
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            quality: 0.7,
+            allowsEditing: true,
+            aspect: [1, 1],
+        });
+
+        if (result.canceled) return;
+
+        setSelectedImage(result.assets[0].uri);
+        setForm({ ...form, image: result.assets[0].uri });
+    };
+
+    const handlePickFromGallery = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (status !== 'granted') {
+            Alert.alert('Permission required', 'Gallery access is needed.');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+        });
+
+        if (!result.canceled) {
+            setSelectedImage(result.assets[0].uri);
+            setForm({ ...form, image: result.assets[0].uri });
+        }
+    };
+
+    const handleImageOption = () => {
+        Alert.alert('Add Image', 'Choose an option',
+            [
+                { text: 'Take Photo', onPress: handleAddPhoto },
+                { text: 'Choose from Gallery', onPress: handlePickFromGallery},
+                { text: 'Cancel', style: 'cancel'}
+            ]
+        );
+    };
 
     const handleAdd = () => {
         if (!form.name.trim()) {
@@ -41,6 +94,38 @@ export default function AddItemScreen({navigation}: any) {
             <Text style={styles.header}>Add New Item</Text>
 
             <View style={styles.form}>
+                <View style={styles.imageSection}>
+                    <Text style={styles.label}>Image (optional)</Text>
+
+                    {selectedImage ? (
+                        <View style={styles.imagePreviewContainer}>
+                            <Image source={{uri: selectedImage}} style={styles.imagePreview}/>
+                            <View style={styles.imageButtonRow}>
+                                <TouchableOpacity
+                                    style={[styles.imageButton, styles.changeButton]}
+                                    onPress={handleImageOption}>
+                                    <Text style={styles.imageButtonText}>Change</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.imageButton, styles.removeButton]}
+                                    onPress={ () => {
+                                        setSelectedImage(null);
+                                        setForm({ ...form, image: '' });
+                                    }}>
+                                    <Text style={styles.imageButtonText}>Remove</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            style={styles.imagePlaceholder}
+                            onPress={handleImageOption}>
+                                <Text style={styles.imagePlaceholderText}>Add photo</Text>
+                                <Text style={styles.imagePlaceholderSubtext}>Tap to take a photo or choose from gallery</Text>
+                            </TouchableOpacity>
+                    )}
+                </View>
+
                 <Text style={styles.label}>Name *</Text>
                 <TextInput
                     style={styles.input}
@@ -111,11 +196,18 @@ export default function AddItemScreen({navigation}: any) {
                     style={styles.input}
                     value={form.image}
                     onChangeText={(text) => setForm({ ...form, image: text })}
-                    placeholder="https://example.com/image.jpg" />
+                    placeholder="Or enter image URL here"
+                    editable={!selectedImage} />
 
-                <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-                    <Text style={styles.addButtonText}>Add to collection</Text>
-                </TouchableOpacity>
+                <View style={styles.buttonRow}>
+                    <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+                        <Text style={styles.addButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+                        <Text style={styles.addButtonText}>Add to collection</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </ScrollView>
     );
@@ -138,6 +230,68 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 20,
         marginBottom: 20,
+    },
+    imageSection: {
+        marginBottom: 20,
+    },
+    imagePreviewContainer: {
+        alignItems: 'center',
+    },
+    imagePreview: {
+        width: 150,
+        height: 150,
+        borderRadius: 8,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#444',
+    },
+    imageButtonRow: {
+        flexDirection: 'row',
+        gap: 10,
+        marginTop: 5,
+    },
+    imageButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 6,
+    },
+    removeButton: {
+        backgroundColor: '#333'
+    },
+    changeButton: {
+        backgroundColor: '#333'
+    },
+    imageButtonText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 14,
+    },
+    imagePlaceholder: {
+        width: '100%',
+        height: 150,
+        borderRadius: 8,
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#ddd',
+        borderStyle: 'dashed',
+    },
+    imagePlaceholderText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 4,
+    },
+    imagePlaceholderIcon: {
+        fontSize: 16,
+        marginBottom: 4,
+    },
+    imagePlaceholderSubtext: {
+        fontSize: 12,
+        color: '#333',
+        textAlign: 'center',
+        paddingHorizontal: 20,
     },
     label: {
         fontSize: 14,
@@ -177,6 +331,12 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: '600',
     },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 24,
+        gap: 12,
+    },
     addButton: {
         backgroundColor: '#444',
         padding: 16,
@@ -185,6 +345,21 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     addButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    cancelButton: {
+        flex: 1,
+        backgroundColor: '#444',
+        padding: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 20,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    cancelButtonText: {
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
