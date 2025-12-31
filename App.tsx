@@ -25,6 +25,8 @@ export type RootStackParamList = {
     ProjectDetail: {projectId: string};
     PhotoDetail: {projectId: string; photoId: string};
     ProjectEdit: {projectId?: string} | undefined;
+    StitchSession: {projecId: string};
+    SessionDetail: {projectId: string; sessionId: string};
     PhotoFullscreen: { projectId: string; photoId: string};
     CollectionAdd: undefined;
 };

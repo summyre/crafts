@@ -6,7 +6,7 @@ type ProjectsContextType = {
     setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
 };
 
-const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
+const ProjectsContext = createContext<ProjectsContextType | null>(null);
 
 export function ProjectsProvider({children}: {children: React.ReactNode}) {
     const [projects, setProjects] = useState<Project[]>([]);

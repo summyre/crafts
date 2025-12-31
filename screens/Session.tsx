@@ -2,30 +2,22 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useCounter } from "../hooks/useCounter";
+import { useTimer } from "../hooks/useTimer";
+
 type counterType = 'rows' | 'increase' | 'decrease'
 type counterButtonProps = {
     label: string;
     onPress: () => void;
 };
 
-export default function StitchCounterSession() {
-    const [rows, setRows] = useState(0);
-    const [increase, setIncrease] = useState(0);
-    const [decrease, setDecrease] = useState(0);
-    const [isRunning, setIsRunning] = useState(false);
-    const [timerSeconds, setTimerSeconds] = useState(0);
+const CounterButton: React.FC<counterButtonProps> = ({ label, onPress}) => (
+    <TouchableOpacity style={styles.counterButton} onPress={onPress}>
+        <Text style={styles.counterButtonText}>{label}</Text>
+    </TouchableOpacity>
+    );
 
-    useEffect(() => {
-        let interval = null;
-        if (isRunning) {
-            interval = setInterval(() => {
-                setTimerSeconds(prev => prev + 1);
-            }, 1000);
-        }
-        return () => { if (interval) { clearInterval(interval) } };
-    }, [isRunning]);
-
-    const formatTime = (totalSeconds: number) => {
+const formatTime = (totalSeconds: number) => {
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
@@ -34,52 +26,19 @@ export default function StitchCounterSession() {
             `${seconds.toString().padStart(2, '0')}`;
     };
 
+export default function StitchCounterSession() {
+    const rows = useCounter();
+    const increase = useCounter();
+    const decrease = useCounter();
+
+    const timer = useTimer();
+
     const handleReset = () => {
-        setRows(0);
-        setIncrease(0);
-        setDecrease(0);
-        setTimerSeconds(0);
-        setIsRunning(false);
+        rows.reset();
+        increase.reset();
+        decrease.reset();
+        timer.reset();
     };
-
-    const handleStop = () => {
-        setIsRunning(false);
-    };
-
-    const handlePause = () => {
-        setIsRunning(!isRunning);
-    }
-
-    const handleMinus = (counterType: counterType) => {
-        switch(counterType) {
-            case 'rows':
-                if (rows > 0) setRows(rows - 1);
-                break;
-            case 'increase':
-                if (increase > 0) setIncrease(increase - 1);
-                break;
-            case 'decrease':
-                if (decrease > 0) setDecrease(decrease - 1);
-                break;
-        }
-    };
-
-    const handlePlus = (counterType: counterType) => {
-        switch(counterType) {
-            case 'rows': setRows(rows + 1);
-                break;
-            case 'increase': setIncrease(increase + 1);
-                break;
-            case 'decrease': setDecrease(decrease + 1);
-                break;
-        }
-    };
-
-    const CounterButton: React.FC<counterButtonProps> = ({ label, onPress}) => (
-    <TouchableOpacity style={styles.counterButton} onPress={onPress}>
-        <Text style={styles.counterButtonText}>{label}</Text>
-    </TouchableOpacity>
-    );
 
     return (
         <SafeAreaView style={styles.container}>
@@ -87,15 +46,15 @@ export default function StitchCounterSession() {
                 <Text style={styles.headerText}>Project 1 - Session 1</Text>
             </View>
 
-            <Text style={styles.timer}>{formatTime(timerSeconds)}</Text>
+            <Text style={styles.timer}>{formatTime(timer.seconds)}</Text>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Row</Text>
                     <View style={styles.counterRow}>
-                        <CounterButton label="-" onPress={() => handleMinus('rows')} />
-                        <Text style={styles.counterValue}>{rows}</Text>
-                        <CounterButton label="+" onPress={() => handlePlus('rows')} />
+                        <CounterButton label="-" onPress={rows.decrement} />
+                        <Text style={styles.counterValue}>{rows.value}</Text>
+                        <CounterButton label="+" onPress={() => rows.increment} />
                     </View>
                 </View>
 
@@ -109,18 +68,18 @@ export default function StitchCounterSession() {
                 <View style={styles.row}>
                     <View style={styles.cardHalf}>
                         <Text style={styles.sectionTitle}>Increase</Text>
-                        <CounterButton label="-" onPress={() => handleMinus('increase')} />
-                        <Text style={styles.counterValue}>{increase}</Text>
-                        <CounterButton label="+" onPress={() => handlePlus('increase')} />
+                        <CounterButton label="-" onPress={increase.decrement} />
+                        <Text style={styles.counterValue}>{increase.value}</Text>
+                        <CounterButton label="+" onPress={increase.increment} />
                     </View>
                 </View>
 
                 <View style={styles.row}>
                     <View style={styles.cardHalf}>
                         <Text style={styles.sectionTitle}>Decrease</Text>
-                        <CounterButton label="-" onPress={() => handleMinus('decrease')} />
-                        <Text style={styles.counterValue}>{decrease}</Text>
-                        <CounterButton label="+" onPress={() => handlePlus('decrease')} />
+                        <CounterButton label="-" onPress={decrease.decrement} />
+                        <Text style={styles.counterValue}>{decrease.value}</Text>
+                        <CounterButton label="+" onPress={decrease.increment} />
                     </View>
                 </View>
             </ScrollView>
