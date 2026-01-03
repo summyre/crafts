@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, Image } from "react-native";
 import { useCollection } from "../store/CollectionContext";
 import { CollectionItem } from "../store/collectionStore";
-import { v4 as uuidv4 } from "uuid";
 import * as ImagePicker from 'expo-image-picker';
 
 export default function AddItemScreen({navigation}: any) {
@@ -18,6 +17,10 @@ export default function AddItemScreen({navigation}: any) {
         image: '',
     });
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const generateId = () => {
+        return Date.now().toString(36) + Math.random().toString(36).substring(2);
+    };
 
     const handleAddPhoto = async () => {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -78,7 +81,7 @@ export default function AddItemScreen({navigation}: any) {
 
         const newItem: CollectionItem = {
             ...form,
-            id: uuidv4(), // generate unique id
+            id: generateId(), // generate unique id
             stock: Number(form.stock) || 1,
         };
 

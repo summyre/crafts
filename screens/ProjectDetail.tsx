@@ -59,7 +59,7 @@ export default function ProjectDetailScreen() {
                     <Text style={styles.photoTitle}>{item.title || 'Progress photo'}</Text>
 
                     {item.notes ? (
-                        <Text style={styles.notes} numberOfLines={2}>{item.notes}</Text>
+                        <Text style={styles.notes}>{item.notes}</Text>
                     ): null}
 
                     <Text style={styles.timestamp}>
@@ -127,16 +127,19 @@ export default function ProjectDetailScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{project.title}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('StitchSession', {projectId})}>
-                <Text>+ New Session</Text>
-            </TouchableOpacity>
 
             <Text style={styles.sectionHeader}>Sessions</Text>
+            <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => navigation.navigate('StitchSession', {projectId})}>
+                    <Text style={styles.addButtonText}>+ New Session</Text>
+            </TouchableOpacity>
+
             <FlatList
                 data={project.sessions}
                 keyExtractor={(item) => item.id}
                 renderItem={renderSession}
-                scrollEnabled={false}
+                scrollEnabled={true}
                 ListEmptyComponent={<Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>}
                 />
 
@@ -151,7 +154,7 @@ export default function ProjectDetailScreen() {
                 data={project.photos}
                 keyExtractor={(item) => item.id}
                 renderItem={renderPhoto}
-                scrollEnabled={false}
+                scrollEnabled={true}
                 ListEmptyComponent={<Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>}
                 />
         </View>

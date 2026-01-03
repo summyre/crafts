@@ -47,7 +47,6 @@ export default function ProjectScreen() {
                 data={projects}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
-                numColumns={2}
                 ListEmptyComponent={
                     <Text style={styles.emptyText}>No projects yet. Create one to get started.</Text>
                 }

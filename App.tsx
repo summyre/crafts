@@ -9,10 +9,13 @@ import HomeScreen from './screens/HomeScreen';
 import ProjectScreen from './screens/Projects';
 import ProjectDetailScreen from './screens/ProjectDetail';
 import ProjectEditScreen from './screens/ProjectEdit';
+import PhotoDetailScreen from './screens/PhotoDetail';
 import AddItemScreen from './screens/CollectionAdd';
+import StitchSessionScreen from './screens/StitchSession';
+import SessionDetailScreen from './screens/SessionDetail';
+
 import { ProjectsProvider } from './store/ProjectsContext';
 import { CollectionProvider } from './store/CollectionContext';
-
 
 enableScreens();
 
@@ -59,9 +62,21 @@ export default function App() {
                 component={ProjectEditScreen}
                 options={{ title: 'Project' }}/>
               <Stack.Screen
+                name = "PhotoDetail"
+                component={PhotoDetailScreen}
+                options={{ title: 'Photo' }}/>
+              <Stack.Screen
                 name = "CollectionAdd"
                 component={AddItemScreen}
                 options={{ title: 'Add New Item' }}/>
+              <Stack.Screen
+                name = "StitchSession"
+                component={StitchSessionScreen}
+                options={{ title: 'Session' }}/>
+              <Stack.Screen
+                name = "SessionDetail"
+                component={SessionDetailScreen}
+                options={{ title: 'Session' }}/>
             </Stack.Navigator>
           </NavigationContainer>
         </ProjectsProvider>
