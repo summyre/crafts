@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, Alert, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert, TextInput, FlatList } from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
 import { useProjects } from "../store/ProjectsContext";
+import { ProjectPhoto } from "../store/types";
 
 type RouteProps = RouteProp<RootStackParamList, 'SessionDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -44,7 +45,7 @@ export default function SessionDetailScreen() {
         ));
     };
 
-    const addPhoto = async () => {
+    const handleAddPhoto = async () => {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
         if (!permission.granted) {
             Alert.alert('Permission required', 'Camera access is needed.');
@@ -54,12 +55,18 @@ export default function SessionDetailScreen() {
         const result = await ImagePicker.launchCameraAsync({quality: 0.7});
         if (result.canceled) return;
 
-        const uri = result.assets[0].uri;
+        const newPhoto: ProjectPhoto = {
+            id: Date.now().toString(),
+            uri: result.assets[0].uri,
+            createdAt: Date.now(),
+        };
 
         setProjects((prev) => prev.map((p) =>
             p.id === projectId ? {
-                ...p, sessions: p.sessions.map((s) =>
-                    s.id === sessionId ? { ...s, photoUri: uri } : s
+                ...p,
+                photos: [newPhoto, ...(p.photos || [])],
+                sessions: p.sessions.map((s) =>
+                    s.id === sessionId ? { ...s, photos: [newPhoto, ...(s.photos || [])] } : s
                 ),
             } : p
         ));
@@ -85,14 +92,17 @@ export default function SessionDetailScreen() {
                 onChangeText={setNotes}
                 onBlur={saveNotes} />
 
-            {session.photoUri ? (
-                <Image source={{uri: session.photoUri}} style={styles.image} />
-            ) : (
-                <TouchableOpacity style={styles.photoButton} onPress={addPhoto}>
-                    <Text>Add Progress Photo</Text>
-                </TouchableOpacity>
-            )}
-
+            <TouchableOpacity style={styles.photoButton} onPress={() => handleAddPhoto()}>
+                <Text>Add Progress Photo</Text>
+            </TouchableOpacity>
+            <FlatList
+                data={session.photos}
+                keyExtractor={(item) => item.id}
+                renderItem={({item}) => (
+                    <Image source={{uri: item.uri}} style={{width: 120, height: 120}} />
+                )}
+                horizontal />
+                
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <Text>Back to Project</Text>
             </TouchableOpacity>

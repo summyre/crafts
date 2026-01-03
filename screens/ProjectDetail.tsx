@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useProjects } from "../store/ProjectsContext";
-import { Session } from "../store/types";
+import { Session, ProjectPhoto } from "../store/types";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -32,7 +32,7 @@ export default function ProjectDetailScreen() {
         );
     };
 
-    const renderPhoto = ({item}: {item: any}) => {
+    const renderPhoto = ({item}: {item: ProjectPhoto}) => {
         const date = new Date(item.createdAt);
         
         return (
@@ -73,7 +73,7 @@ export default function ProjectDetailScreen() {
         )
     };
     
-    const handleAddPhoto = async () => {
+    const handleAddPhoto = async (sessionId?: string) => {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
 
         if (!permission.granted) {
@@ -84,17 +84,31 @@ export default function ProjectDetailScreen() {
         const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
         if (result.canceled) return;
 
-        const newPhoto = {
+        const newPhoto: ProjectPhoto = {
             id: Date.now().toString(),
             uri: result.assets[0].uri,
             createdAt: Date.now(),
         };
         
-        setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, photos: [newPhoto, ...p.photos]}:p ));
-
+        setProjects((prev) => prev.map((p) =>
+            p.id === projectId ? { ...p, photos: [newPhoto, ...(p.photos || [])] } : p
+            )
+        );
     };
 
-    const renderSession = ({item}: {item: any}) => {
+    const handleToggleMilestone = (sessionId: string) => {
+        setProjects(prev => 
+            prev.map(p => {
+                if (p.id !== projectId) return p;
+                const updatedSessions = p.sessions.map(s =>
+                    s.id === sessionId ? { ...s, isMilestone: !s.isMilestone } : s
+                );
+                return { ...p, sessions: updatedSessions};
+            })
+        );
+    }
+
+    const renderSession = ({item}: {item: Session}) => {
         const date = new Date(item.createdAt);
 
         return (
@@ -110,6 +124,10 @@ export default function ProjectDetailScreen() {
                     <View style={styles.timelineContent}>
                         <Text style={styles.photoTitle}>{date.toLocaleDateString()}</Text>
                     </View>
+
+                    <TouchableOpacity style={styles.milestoneButton} onPress={() => handleToggleMilestone(item.id)}>
+                        <Text style={{color:item.isMilestone ? 'gold': '#444'}}>{item.isMilestone ? 'Milestone' : 'Mark as Milestone'}</Text>
+                    </TouchableOpacity>
 
                     <Text style={styles.notes}>
                         Rows: {item.counters.rows}
@@ -146,7 +164,7 @@ export default function ProjectDetailScreen() {
             <Text style={styles.sectionHeader}>Photos</Text>
             <TouchableOpacity
                 style={styles.addButton}
-                onPress={handleAddPhoto}>
+                onPress={() => handleAddPhoto()}>
                     <Text style={styles.addButtonText}>+ Add Photo</Text>
             </TouchableOpacity>
 
@@ -272,5 +290,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 16,
         marginBottom: 8
+    },
+    milestoneButton: {
+        marginTop: 8,
+        padding: 6,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: 'gold',
+        alignSelf: 'flex-start'
     }
 });

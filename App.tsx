@@ -13,6 +13,7 @@ import PhotoDetailScreen from './screens/PhotoDetail';
 import AddItemScreen from './screens/CollectionAdd';
 import StitchSessionScreen from './screens/StitchSession';
 import SessionDetailScreen from './screens/SessionDetail';
+import CostScreen from './screens/CostCalculator';
 
 import { ProjectsProvider } from './store/ProjectsContext';
 import { CollectionProvider } from './store/CollectionContext';
@@ -30,6 +31,7 @@ export type RootStackParamList = {
     SessionDetail: {projectId: string; sessionId: string};
     CollectionAdd: undefined;
     Camera: {projectId: string; sessionId: string};
+    CostCalculator: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -77,6 +79,10 @@ export default function App() {
                 name = "SessionDetail"
                 component={SessionDetailScreen}
                 options={{ title: 'Session' }}/>
+              <Stack.Screen
+                name = "CostCalculator"
+                component={CostScreen}
+                options={{ title: 'Cost Calculator' }}/>
             </Stack.Navigator>
           </NavigationContainer>
         </ProjectsProvider>

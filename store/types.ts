@@ -11,7 +11,9 @@ export type Session = {
     title?: string;
     counters: SessionCounters;
     notes?: string;
-    photoUri?: string;
+    //photoUri?: string;
+    photos?: ProjectPhoto[];
+    isMilestone?: boolean;
 };
 
 export type ProjectPhoto = {
@@ -30,4 +32,9 @@ export type Project = {
     photos: ProjectPhoto[];
     sessions: Session[];
     coverPhotoId?: string;
+};
+
+export type CostResult = {
+    totalCost: number;
+    sellingPrice: number;
 };

@@ -8,36 +8,45 @@ type ProjectsContextType = {
 };
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
+const STORAGE_KEY = '@projects';
 
 export function ProjectsProvider({children}: {children: React.ReactNode}) {
     const [projects, setProjects] = useState<Project[]>([]);
+    const [loaded, setLoaded] = useState(false);
 
     // loading
     useEffect(() => {
         const loadProjects = async () => {
             try {
-                const json = await AsyncStorage.getItem('@projects');
-                if (json) setProjects(JSON.parse(json));
+                const stored = await AsyncStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    setProjects(JSON.parse(stored));
+                }
+
             } catch (error) {
                 console.error('Failed to load projects', error);
+            } finally {
+                setLoaded(true);
             }
         };
 
-        loadProjects;
+        loadProjects();
     }, []);
 
     // saving on every change
     useEffect(() => {
+        if (!loaded) return;
+
         const saveProjects = async () => {
             try {
-                await AsyncStorage.setItem('@projects', JSON.stringify(projects));
+                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
             } catch (error) {
                 console.error('Failed to save projects', error);
             }
         };
-        
+
         saveProjects();
-    }, [projects]);
+    }, [projects, loaded]);
 
     return (
         <ProjectsContext.Provider value={{ projects, setProjects }}>
