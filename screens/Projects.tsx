@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
-import { Project } from '../store/projectsStore';
+import { Project } from '../store/types';
 import { useProjects } from '../store/ProjectsContext';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'Projects'>;

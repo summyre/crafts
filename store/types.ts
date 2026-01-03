@@ -10,7 +10,16 @@ export type Session = {
     createdAt: number;
     title?: string;
     counters: SessionCounters;
+    notes?: string;
     photoUri?: string;
+};
+
+export type ProjectPhoto = {
+    id: string;
+    uri: string;
+    createdAt: number;
+    title?: string;
+    notes?: string;
 };
 
 export type Project = {
@@ -18,6 +27,7 @@ export type Project = {
     title: string;
     craftType: 'Crochet' | 'Cross Stitch';
     notes?: string;
-    sessionss: Session[];
-    coverSessionId?: string;
+    photos: ProjectPhoto[];
+    sessions: Session[];
+    coverPhotoId?: string;
 };

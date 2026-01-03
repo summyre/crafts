@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-nativ
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../App";
 import { useProjects } from "../store/ProjectsContext";
-import { Project } from "../store/projectsStore";
+import { Project } from "../store/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectEdit'>;
@@ -36,6 +36,7 @@ export default function ProjectEditScreen() {
                     craftType,
                     notes,
                     photos: [],
+                    sessions: [],
                 },
                 ...prev,
             ]);

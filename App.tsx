@@ -8,9 +8,7 @@ import CollectionScreen from './screens/Collection';
 import HomeScreen from './screens/HomeScreen';
 import ProjectScreen from './screens/Projects';
 import ProjectDetailScreen from './screens/ProjectDetail';
-import PhotoDetailScreen from './screens/PhotoDetail';
 import ProjectEditScreen from './screens/ProjectEdit';
-import PhotoFullscreenScreen from './screens/PhotoFullScreen';
 import AddItemScreen from './screens/CollectionAdd';
 import { ProjectsProvider } from './store/ProjectsContext';
 import { CollectionProvider } from './store/CollectionContext';
@@ -23,12 +21,12 @@ export type RootStackParamList = {
     Collection: undefined;
     Projects: undefined;
     ProjectDetail: {projectId: string};
-    PhotoDetail: {projectId: string; photoId: string};
     ProjectEdit: {projectId?: string} | undefined;
-    StitchSession: {projecId: string};
+    PhotoDetail: {projectId: string; photoId: string};
+    StitchSession: {projectId: string};
     SessionDetail: {projectId: string; sessionId: string};
-    PhotoFullscreen: { projectId: string; photoId: string};
     CollectionAdd: undefined;
+    Camera: {projectId: string; sessionId: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -57,17 +55,9 @@ export default function App() {
                 component={ProjectDetailScreen}
                 options={{ title: 'Project' }}/>
               <Stack.Screen
-                name = "PhotoDetail"
-                component={PhotoDetailScreen}
-                options={{ title: 'Photo' }}/>
-              <Stack.Screen
                 name = "ProjectEdit"
                 component={ProjectEditScreen}
                 options={{ title: 'Project' }}/>
-              <Stack.Screen
-                name = "PhotoFullscreen"
-                component={PhotoFullscreenScreen}
-                options={{ headerShown: false }}/>
               <Stack.Screen
                 name = "CollectionAdd"
                 component={AddItemScreen}

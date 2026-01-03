@@ -61,12 +61,12 @@ export default function PhotoDetailScreen() {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity
+            {/*<TouchableOpacity
                 onPress={() =>
                     navigation.navigate('PhotoFullscreen', { projectId, photoId })
                 }>
                     <Image source={{uri:photo.uri}} style={styles.image}/>
-                </TouchableOpacity>
+                </TouchableOpacity>*/}
             
             <TextInput
                 placeholder="Photo title"

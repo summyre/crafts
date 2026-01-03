@@ -5,10 +5,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useProjects } from "../store/ProjectsContext";
-import { ProjectPhoto } from "../store/projectsStore";
+import { Session } from "../store/types";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
+
+const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+};
 
 export default function ProjectDetailScreen() {
     const { projectId } = useRoute<RouteProps>().params;
@@ -17,27 +24,55 @@ export default function ProjectDetailScreen() {
     const { projects, setProjects } = useProjects();
     const project = projects.find((p) => p.id === projectId);
 
-    useEffect(() => {
-        if (!project) return;
-
-        navigation.setOptions({
-            title: project.title,
-            headerRight: () => (
-                <TouchableOpacity onPress={() => navigation.navigate('ProjectEdit', {projectId: project.id})}>
-                    <Text style={styles.editText}>Edit</Text>
-                </TouchableOpacity>
-            ),
-        });
-    }, [project?.title]);
-
     if (!project) {
         return (
             <View style={styles.container}>
                 <Text>Project not found.</Text>
             </View>
         );
-    }
+    };
 
+    const renderPhoto = ({item}: {item: any}) => {
+        const date = new Date(item.createdAt);
+        
+        return (
+            <TouchableOpacity
+                style={styles.timelineItem}
+                onPress={() =>
+                    navigation.navigate('PhotoDetail', {projectId, photoId: item.id})
+                }
+                onLongPress={() =>
+                    Alert.alert('Set cover photo', 'Use this photo as the project cover?',
+                        [
+                            { text: 'Cancel', style: 'cancel' },
+                            { text: 'Set as cover', onPress: () => {
+                                setProjects((prev) => prev.map((p) =>
+                                    p.id === projectId ? { ...p, coverPhotoId: item.id } : p
+                                ));
+                            }}
+                        ]
+                    )
+                }>
+                <Image source={{uri: item.uri}} style={styles.timelineImage}/>
+
+                <View style={styles.timelineContent}>
+                    <Text style={styles.photoTitle}>{item.title || 'Progress photo'}</Text>
+
+                    {item.notes ? (
+                        <Text style={styles.notes} numberOfLines={2}>{item.notes}</Text>
+                    ): null}
+
+                    <Text style={styles.timestamp}>
+                        {date.toLocaleDateString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        )
+    };
+    
     const handleAddPhoto = async () => {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -59,92 +94,66 @@ export default function ProjectDetailScreen() {
 
     };
 
-    const handleDeleteProject = () => {
-        Alert.alert('Delete project', 'This will delete the project and all its photos. Are you sure?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: () => {
-                        setProjects((prev) => prev.filter((p) => p.id !== projectId));
-                        navigation.goBack();
-                    },
-                },
-            ]
-        );
-    };
-
-    const renderPhoto = ({item}: {item:ProjectPhoto}) => {
+    const renderSession = ({item}: {item: any}) => {
         const date = new Date(item.createdAt);
 
         return (
-            <TouchableOpacity 
-                style={styles.timelineItem} 
+            <TouchableOpacity
+                style={styles.timelineItem}
                 onPress={() =>
-                    navigation.navigate('PhotoDetail', {projectId, photoId: item.id,})
-                }
-                onLongPress={() =>
-                    Alert.alert('Set cover photo', 'Use this photo as the project cover?',
-                        [
-                            { text: 'Cancel', style: 'cancel'},
-                            {
-                                text: 'Set as cover',
-                                onPress: () => {
-                                    setProjects((prev) => prev.map((p) =>
-                                        p.id === projectId ? { ...p, coverPhotoId: item.id } : p
-                                    ));
-                                },
-                            },
-                        ]
-                    )
-                }
-                >
-                <Image source={{ uri: item.uri }} style={styles.timelineImage}/>
+                    navigation.navigate('SessionDetail', {projectId, sessionId: item.id})
+                }>
+                    <View style={styles.sessionBadge}>
+                        <Text style={styles.sessionBadgeText}>SESSION</Text>
+                    </View>
 
-                <View style={styles.timelineContent}>
-                    <Text style={styles.photoTitle}>
-                        {item.title || 'Untitled session'}
+                    <View style={styles.timelineContent}>
+                        <Text style={styles.photoTitle}>{date.toLocaleDateString()}</Text>
+                    </View>
+
+                    <Text style={styles.notes}>
+                        Rows: {item.counters.rows}
+                        Inc: {item.counters.increase}
+                        Dec: {item.counters.decrease}
                     </Text>
-
-                    {item.notes ? ( <Text style={styles.notes} numberOfLines={3}>{item.notes}</Text> ) : null }
 
                     <Text style={styles.timestamp}>
-                        {date.toLocaleDateString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                        })}
+                        Time: {formatTime(item.counters.seconds)}
                     </Text>
-                </View>
             </TouchableOpacity>
-        )
-    }
+        );
+    };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{project.title}</Text>
-            <Text style={styles.subtitle}>{project.craftType}</Text>
-            
-            {project.notes && (
-                <Text style={styles.notes}>{project.notes}</Text>
-            )}
+            <TouchableOpacity onPress={() => navigation.navigate('StitchSession', {projectId})}>
+                <Text>+ New Session</Text>
+            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.addButton} onPress={handleAddPhoto}>
-                <Text style={styles.addButtonText}>+ Add Photo</Text>
+            <Text style={styles.sectionHeader}>Sessions</Text>
+            <FlatList
+                data={project.sessions}
+                keyExtractor={(item) => item.id}
+                renderItem={renderSession}
+                scrollEnabled={false}
+                ListEmptyComponent={<Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>}
+                />
+
+            <Text style={styles.sectionHeader}>Photos</Text>
+            <TouchableOpacity
+                style={styles.addButton}
+                onPress={handleAddPhoto}>
+                    <Text style={styles.addButtonText}>+ Add Photo</Text>
             </TouchableOpacity>
 
             <FlatList
                 data={project.photos}
                 keyExtractor={(item) => item.id}
                 renderItem={renderPhoto}
-                contentContainerStyle={styles.gallery}
-                ListEmptyComponent={
-                    <Text style={styles.emptyText}>No photos yet. Add one to track progess</Text>
-                }/>
-            
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProject}>
-                <Text style={styles.deleteText}>Delete Project</Text>
-            </TouchableOpacity>
+                scrollEnabled={false}
+                ListEmptyComponent={<Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>}
+                />
         </View>
     );
 }
@@ -242,5 +251,23 @@ const styles = StyleSheet.create({
     timestamp: {
         fontSize: 11,
         color: '#777',
+    },
+    sessionBadge: {
+        backgroundColor: '#ddd',
+        borderRadius: 6,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        marginRight: 8,
+        alignSelf: 'flex-start'
+    },
+    sessionBadgeText: {
+        fontSize: 10,
+        fontWeight: 'bold'
+    },
+    sectionHeader: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 16,
+        marginBottom: 8
     }
 });
