@@ -32,9 +32,41 @@ export type Project = {
     photos: ProjectPhoto[];
     sessions: Session[];
     coverPhotoId?: string;
+    timeline: TimelineItem[];
 };
 
 export type CostResult = {
     totalCost: number;
     sellingPrice: number;
 };
+
+export type Pattern = {
+    id: string;
+    title: string;
+    link?: string;
+    projectId?: string;
+    notes?: string;
+    imageUri?: string;
+    //annotations?: string[];
+};
+
+export type TimelineItem = 
+    | {
+        id: string;
+        type: 'session';
+        sessionId: string;
+        createdAt: number;
+    }
+    | {
+        id: string;
+        type: 'photo';
+        photoId: string;
+        createdAt: number;
+    }
+    | {
+        id: string;
+        type: 'pattern';
+        patternId: string;
+        createdAt: number;
+        annotations?: string[];
+    };

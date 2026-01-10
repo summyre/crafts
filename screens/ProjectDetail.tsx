@@ -5,7 +5,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useProjects } from "../store/ProjectsContext";
+import { usePatterns } from "../store/PatternsContext";
 import { Session, ProjectPhoto } from "../store/types";
+import { TimelineItem } from "../store/types";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -31,6 +33,9 @@ export default function ProjectDetailScreen() {
             </View>
         );
     };
+
+    const { patterns } = usePatterns();
+    const linkedPatterns = project.timeline?.filter(t => t.type === 'pattern').map(t => patterns.find(p => p.id === t.patternId)).filter(Boolean);
 
     const renderPhoto = ({item}: {item: ProjectPhoto}) => {
         const date = new Date(item.createdAt);
@@ -106,6 +111,50 @@ export default function ProjectDetailScreen() {
                 return { ...p, sessions: updatedSessions};
             })
         );
+    };
+
+    const importPatternToTimeline = (patternId: string) => {
+        const timelineItem: TimelineItem = {
+            id: Date.now().toString(),
+            type: 'pattern',
+            patternId,
+            createdAt: Date.now(),
+            annotations: []
+        };
+
+        setProjects(prev => prev.map(p =>
+            p.id === projectId ? {
+                ...p, timeline: [timelineItem, ...(p.timeline || [])]
+            } : p
+        ));
+    };
+
+    const renderTimelineItem = ({item}: {item: TimelineItem}) => {
+        if (item.type === 'session') {
+            const session = project.sessions.find(s => s.id === item.sessionId);
+            if (!session) return null;
+
+            return (<Text>Session - {new Date(item.createdAt).toDateString()}</Text>);
+        }
+
+        if (item.type === 'photo') {
+            const photo = project.photos.find(p => p.id === item.photoId);
+            if (!photo) return null;
+
+            return <Image source={{uri: photo.uri}} style={{height: 100}} />;
+        }
+        if (item.type === 'pattern') {
+            const pattern = patterns.find(p => p.id === item.patternId);
+            if (!pattern) return null;
+
+            return (
+                <TouchableOpacity onPress={() => navigation.navigate('PatternAnnotate', {projectId, timelineItemId: item.id})}>
+                    <Text>Pattern</Text>
+                    <Text>{pattern.title}</Text>
+                </TouchableOpacity>
+            );
+        }
+        return null;
     }
 
     const renderSession = ({item}: {item: Session}) => {
@@ -145,6 +194,20 @@ export default function ProjectDetailScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{project.title}</Text>
+            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('PatternPicker', {projectId})}>
+                <Text>+ Link Pattern</Text>
+            </TouchableOpacity>
+            <Text style={styles.sectionHeader}>Patterns</Text>
+            {linkedPatterns.map(pattern => (
+                <View key={pattern.id}>
+                    <Text>{pattern.title}</Text>
+                </View>
+            ))}
+
+            <FlatList
+                data={project.timeline}
+                keyExtractor={item => item.id}
+                renderItem={renderTimelineItem} />
 
             <Text style={styles.sectionHeader}>Sessions</Text>
             <TouchableOpacity
