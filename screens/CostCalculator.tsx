@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable } from "react-native";
 import { CostResult } from "../store/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const localeCurrencyMap: Record<string, string> = {
     "en-GB": "GBP",
@@ -15,7 +17,7 @@ const localeCurrencyMap: Record<string, string> = {
     "ms-MY": "MYR"
 }
 
-const getCurrency = () => {
+const getAutoCurrency = () => {
     const deviceLocale = Intl.DateTimeFormat().resolvedOptions().locale;
     return localeCurrencyMap[deviceLocale] ?? "GBP";
 };
@@ -29,7 +31,27 @@ export default function CostScreen() {
     const [extraCosts, setExtraCosts] = useState('');
     const [profitMargin, setProfitMargin] = useState('');
     const [result, setResult] = useState<CostResult | null>();
-    const [currencyCode, setCurrencyCode] = useState<string>(getCurrency());
+    const [currencyCode, setCurrencyCode] = useState<string>('GBP');
+
+    const loadCurrency = async () => {
+        try {
+            const pref = await AsyncStorage.getItem('preferredCurrency');
+            const manual = await AsyncStorage.getItem('manualCurrencyCode');
+
+            if (pref === 'manual' && manual) {
+                setCurrencyCode(JSON.parse(manual));
+            } else if (pref && pref !== 'auto') {
+                setCurrencyCode(JSON.parse(pref));
+            } else {
+                setCurrencyCode(getAutoCurrency());
+            }
+        } catch (error) {
+            console.error('Error loading currency:', error);
+            setCurrencyCode(getAutoCurrency());
+        }
+    };
+
+    useFocusEffect(useCallback(() => {loadCurrency();}, []));
 
     const calculateCost = () => {
         const yarnCost = (Number(yarnUsed) / Number(skeinSize)) * Number(skeinPrice);
