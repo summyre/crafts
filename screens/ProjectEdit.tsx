@@ -37,6 +37,7 @@ export default function ProjectEditScreen() {
                     notes,
                     photos: [],
                     sessions: [],
+                    timeline: []
                 },
                 ...prev,
             ]);
@@ -46,11 +47,13 @@ export default function ProjectEditScreen() {
 
     return (
         <View style={styles.container}>
+            <Text style={styles.title}>{existingProject ? 'Edit Project' : 'Create New Project'}</Text>
             <TextInput
                 placeholder="Project Title"
                 value={title}
                 onChangeText={setTitle}
-                style={styles.input}/>
+                style={styles.input}
+                autoFocus={!existingProject} />
 
             <View style={styles.toggleRow}>
                 {(['Crochet', 'Cross Stitch'] as const).map((type) => (
@@ -91,6 +94,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 24,
+        textAlign: 'center',
+        color: '#333'
     },
     input: {
         borderWidth: 1,

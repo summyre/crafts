@@ -33,6 +33,7 @@ export type Project = {
     sessions: Session[];
     coverPhotoId?: string;
     timeline: TimelineItem[];
+    patternIds?: string[];
 };
 
 export type CostResult = {

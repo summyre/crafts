@@ -6,8 +6,7 @@ import { RootStackParamList } from "../App";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useProjects } from "../store/ProjectsContext";
 import { usePatterns } from "../store/PatternsContext";
-import { Session, ProjectPhoto } from "../store/types";
-import { TimelineItem } from "../store/types";
+import { Session, ProjectPhoto, TimelineItem, Pattern } from "../store/types";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -35,7 +34,7 @@ export default function ProjectDetailScreen() {
     };
 
     const { patterns } = usePatterns();
-    const linkedPatterns = project.timeline?.filter(t => t.type === 'pattern').map(t => patterns.find(p => p.id === t.patternId)).filter(Boolean);
+    const linkedPatterns: Pattern[] = project.patternIds ? patterns.filter((p) => project.patternIds!.includes(p.id)) : [];
 
     const renderPhoto = ({item}: {item: ProjectPhoto}) => {
         const date = new Date(item.createdAt);
@@ -99,6 +98,18 @@ export default function ProjectDetailScreen() {
             p.id === projectId ? { ...p, photos: [newPhoto, ...(p.photos || [])] } : p
             )
         );
+
+        const timelineItem: TimelineItem = {
+            id: Date.now().toString(),
+            type: 'photo',
+            photoId: newPhoto.id,
+            createdAt: Date.now()
+        };
+
+        setProjects((prev) => prev.map((p) =>
+            p.id === projectId ? { ...p, timeline: [timelineItem, ...(p.timeline || [])] } : p
+            )
+        );
     };
 
     const handleToggleMilestone = (sessionId: string) => {
@@ -134,23 +145,61 @@ export default function ProjectDetailScreen() {
             const session = project.sessions.find(s => s.id === item.sessionId);
             if (!session) return null;
 
-            return (<Text>Session - {new Date(item.createdAt).toDateString()}</Text>);
+            return (
+                <TouchableOpacity 
+                    style={styles.timelineImage} 
+                    onPress={() => navigation.navigate('SessionDetail', {projectId, sessionId: item.sessionId})}>
+                        <View style={styles.sessionBadge}>
+                            <Text style={styles.sessionBadgeText}>Session</Text>
+                        </View>
+                    <View style={styles.timelineContent}>
+                        <Text style={styles.photoTitle}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                        <Text style={styles.notes}>
+                            Rows: {session.counters.rows} |
+                            Inc: {session.counters.increase} |
+                            Dec: {session.counters.decrease}
+                        </Text>
+                        <Text style={styles.timestamp}>Time: {formatTime(session.counters.seconds)}</Text>
+                    </View>
+                </TouchableOpacity>
+            );
         }
 
         if (item.type === 'photo') {
             const photo = project.photos.find(p => p.id === item.photoId);
             if (!photo) return null;
 
-            return <Image source={{uri: photo.uri}} style={{height: 100}} />;
+            return (
+                <TouchableOpacity
+                    style={styles.timelineItem}
+                    onPress={() => navigation.navigate('PhotoDetail', {projectId, photoId: item.photoId})}>
+                        <Image source={{uri: photo.uri}} style={styles.timelineImage} />
+                        <View style={styles.timelineContent}>
+                            <Text style={styles.photoTitle}>{photo.title || 'Progress photo'}</Text>
+                            <Text style={styles.timestamp}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                        </View>
+                </TouchableOpacity>
+            );
         }
+
         if (item.type === 'pattern') {
             const pattern = patterns.find(p => p.id === item.patternId);
             if (!pattern) return null;
-
+        
             return (
-                <TouchableOpacity onPress={() => navigation.navigate('PatternAnnotate', {projectId, timelineItemId: item.id})}>
-                    <Text>Pattern</Text>
-                    <Text>{pattern.title}</Text>
+                <TouchableOpacity
+                    style={styles.timelineItem}
+                    onPress={() => navigation.navigate('PatternAnnotate', {projectId, timelineItemId: item.id})}>
+                        <View style={[styles.sessionBadge, {backgroundColor: '#e6f7ff'}]}>
+                            <Text style={[styles.sessionBadgeText, {color: '#1890ff'}]}>Pattern</Text>
+                        </View>
+                        <View style={styles.timelineContent}>
+                            <Text style={styles.photoTitle}>{pattern.title}</Text>
+                            <Text style={styles.timestamp}>Added: {new Date(item.createdAt).toLocaleDateString()}</Text>
+                            {item.annotations && item.annotations.length > 0 && (
+                                <Text style={styles.notes}>Notes: {item.annotations.join(', ')}</Text>
+                            )}
+                        </View>
                 </TouchableOpacity>
             );
         }
@@ -191,23 +240,59 @@ export default function ProjectDetailScreen() {
         );
     };
 
+    const handleLinkPattern = () => { navigation.navigate('PatternPicker', {projectId}); };
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{project.title}</Text>
-            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('PatternPicker', {projectId})}>
+
+            <Text style={styles.sectionHeader}>Linked Patterns</Text>
+            <TouchableOpacity style={styles.addButton} onPress={handleLinkPattern}>
                 <Text>+ Link Pattern</Text>
             </TouchableOpacity>
-            <Text style={styles.sectionHeader}>Patterns</Text>
-            {linkedPatterns.map(pattern => (
-                <View key={pattern.id}>
-                    <Text>{pattern.title}</Text>
-                </View>
-            ))}
+            {linkedPatterns.length > 0 ? (
+                linkedPatterns.map(pattern => (
+                    <TouchableOpacity
+                        key={pattern.id}
+                        style={styles.patternItem}
+                        onPress={() => {
+                            const inTimeline = project.timeline?.some(item =>
+                                item.type === 'pattern' && item.patternId === pattern.id
+                            );
 
-            <FlatList
-                data={project.timeline}
-                keyExtractor={item => item.id}
-                renderItem={renderTimelineItem} />
+                            if (!inTimeline) {
+                                importPatternToTimeline(pattern.id);
+                                Alert.alert('Success', 'Pattern added');
+                            } else {
+                                navigation.navigate('PatternAnnotate', {
+                                    projectId,
+                                    timelineItemId: project.timeline.find(item =>
+                                        item.type === 'pattern' && item.patternId === pattern.id
+                                    )?.id || ''
+                                });
+                            }
+                        }}>
+                            <Text style={styles.patternTitle}>{pattern.title}</Text>
+                            {pattern.link && (
+                                <Text style={styles.patternLink} numberOfLines={1}>{pattern.link}</Text>
+                            )}
+                        </TouchableOpacity>
+                ))
+            ): (
+                <Text style={styles.emptyText}>No patterns linked</Text>
+            )}
+
+            <Text style={styles.sectionHeader}>Timeline</Text>
+            {project.timeline && project.timeline.length > 0 ? (
+                <FlatList
+                    data={[...project.timeline].sort((a,b) => b.createdAt - a.createdAt)}
+                    keyExtractor={item => item.id}
+                    renderItem={renderTimelineItem} 
+                    scrollEnabled={false}
+                    style={styles.timelineList} />
+            ): (
+                <Text style={styles.emptyText}>Timeline is empty. Add sessions, photos or patterns</Text>
+            )}
 
             <Text style={styles.sectionHeader}>Sessions</Text>
             <TouchableOpacity
@@ -216,13 +301,17 @@ export default function ProjectDetailScreen() {
                     <Text style={styles.addButtonText}>+ New Session</Text>
             </TouchableOpacity>
 
-            <FlatList
-                data={project.sessions}
-                keyExtractor={(item) => item.id}
-                renderItem={renderSession}
-                scrollEnabled={true}
-                ListEmptyComponent={<Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>}
-                />
+            {project.sessions.length > 0 ? (
+                <FlatList
+                    data={[...project.sessions].sort((a,b) => b.createdAt - a.createdAt)}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderSession}
+                    scrollEnabled={false}
+                    style={styles.timelineList}
+                    />
+            ) : (
+                <Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>
+            )}
 
             <Text style={styles.sectionHeader}>Photos</Text>
             <TouchableOpacity
@@ -231,13 +320,16 @@ export default function ProjectDetailScreen() {
                     <Text style={styles.addButtonText}>+ Add Photo</Text>
             </TouchableOpacity>
 
+            {project.photos.length > 0 ? (
             <FlatList
-                data={project.photos}
+                data={[...project.photos].sort((a,b) => b.createdAt - a.createdAt)}
                 keyExtractor={(item) => item.id}
                 renderItem={renderPhoto}
-                scrollEnabled={true}
-                ListEmptyComponent={<Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>}
-                />
+                scrollEnabled={false}
+                style={styles.timelineList} />
+            ) : (
+                <Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>
+            )}
         </View>
     );
 }
@@ -361,5 +453,25 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'gold',
         alignSelf: 'flex-start'
-    }
+    },
+    patternTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 4
+    },
+    patternLink: {
+        fontSize: 12,
+        color: '#0066cc'
+    },
+    patternItem: {
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        marginBottom: 8,
+        backgroundColor: '#fafafa'
+    },
+    timelineList: {
+        marginBottom: 16
+    },
 });

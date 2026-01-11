@@ -202,9 +202,9 @@ export default function SettingsScreen() {
                     <Picker selectedValue={currency} onValueChange={handleCurrencyChange} style={{backgroundColor: theme.colors.card, color: theme.colors.text}}>
                         <Picker.Item label="Auto-detect (device locale)" value="auto" />
                         <Picker.Item label="Set manually" value="manual" />
-                        {commonCurrencies.map((curr) => (
+                        {/*{commonCurrencies.map((curr) => (
                             <Picker.Item key={curr.code} label={`${curr.name} (${curr.symbol})`} value={curr.code} />
-                        ))}
+                        ))}*/}
                     </Picker>
 
                     {currency === 'manual' && (
