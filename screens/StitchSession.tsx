@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RouteProp, useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { useProjects } from "../store/ProjectsContext";
-import { Session } from "../store/types";
+import { Session, TimelineItem } from "../store/types";
 import { useCounter } from "../hooks/useCounter";
 import { useTimer } from "../hooks/useTimer";
 
@@ -46,12 +46,21 @@ export default function StitchSessionScreen() {
                 increase: increase.value, 
                 decrease: decrease.value, 
                 seconds: timer.seconds
-            },
+            }
+        };
+
+        const timelineItem: TimelineItem = {
+            id: Date.now().toString() + '-session',
+            type: 'session',
+            sessionId: newSession.id,
+            createdAt: newSession.createdAt
         };
 
         setProjects((prev) => prev.map(p =>
             p.id === projectId ? {
-                ...p, sessions: [newSession, ...p.sessions]
+                ...p, 
+                sessions: [newSession, ...p.sessions],
+                timeline: [timelineItem, ...(p.timeline || [])]
             } : p
         ));
     

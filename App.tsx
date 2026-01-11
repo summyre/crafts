@@ -19,6 +19,7 @@ import PatternPickerScreen from './screens/PatternPicker';
 import SettingsScreen from './screens/Settings';
 import ProjectDefaultsScreen from './screens/ProjectDefaults';
 import HelpDocScreen from './screens/HelpDoc';
+import PatternWishlistScreen from './screens/PatternWishlist';
 
 import { ProjectsProvider } from './store/ProjectsContext';
 import { CollectionProvider } from './store/CollectionContext';
@@ -44,6 +45,7 @@ export type RootStackParamList = {
     CostCalculator: undefined;
     PatternPicker: {projectId: string};
     PatternAnnotate: {projectId: string; timelineItemId: string};
+    PatternWishlist: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -105,6 +107,10 @@ export default function App() {
                     name = "PatternPicker"
                     component={PatternPickerScreen}
                     options={{ title: 'Pattern Picker' }}/>
+                  <Stack.Screen
+                    name = "PatternWishlist"
+                    component={PatternWishlistScreen}
+                    options={{ title: 'Pattern Wishlist' }}/>
                   <Stack.Screen
                     name = "Settings"
                     component={SettingsScreen}

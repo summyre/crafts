@@ -38,6 +38,10 @@ export default function ProjectScreen() {
 
     return (
         <View style={{ flex: 1 }}>
+            <TouchableOpacity style={styles.wishlistButton} onPress={() => navigation.navigate('PatternWishlist')}>
+                <Text style={styles.wishlistButtonText}>Pattern Wishlist</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('ProjectEdit', undefined)}>
                 <Text style={styles.createText}>+ New Project</Text>
             </TouchableOpacity>
@@ -110,5 +114,17 @@ const styles = StyleSheet.create({
     placeholderText:{
         color: '#888',
         fontSize: 12,
+    },
+    wishlistButton: {
+        padding: 12,
+        margin: 12,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#555',
+        alignItems: 'center'
+    },
+    wishlistButtonText: {
+        fontWeight: 'bold',
+        fontSize: 16
     }
 });
