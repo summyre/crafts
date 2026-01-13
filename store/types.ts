@@ -47,6 +47,7 @@ export type Pattern = {
     projectId?: string;
     notes?: string;
     imageUri?: string;
+    pdf?: PatternPDF;
     //annotations?: string[];
 };
 
@@ -74,4 +75,10 @@ export type TimelineItem =
 export type ProjectDefaults = {
     counters: string[];
     craftType?: string;
+};
+
+export type PatternPDF = {
+    uri: string;
+    name?: string;
+    addedAt: number;
 };

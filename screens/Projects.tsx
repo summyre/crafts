@@ -34,7 +34,7 @@ export default function ProjectScreen() {
                     {/*<Text style={styles.status}>{item.status}</Text>*/}
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.wishlistButton} onPress={() => navigation.navigate('PatternWishlist', {projectId: item.id})}>
-                    <Text style={styles.wishlistButtonText}>Pattern Wishlist</Text>
+                    <Text style={styles.wishlistButtonText}>Pattern</Text>
                 </TouchableOpacity>
         </View>
         );

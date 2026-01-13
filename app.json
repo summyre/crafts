@@ -25,6 +25,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-asset",
+      "@config-plugins/react-native-pdf",
+      "@config-plugins/react-native-blob-util"
+    ]
   }
 }

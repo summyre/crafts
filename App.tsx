@@ -114,7 +114,7 @@ export default function App() {
                     <Stack.Screen
                       name = "PatternWishlist"
                       component={PatternWishlistScreen}
-                      options={{ title: 'Pattern Wishlist' }}/>
+                      options={{ title: 'Pattern' }}/>
                     <Stack.Screen
                       name = "PatternEdit"
                       component={EditWishlistPatternScreen}

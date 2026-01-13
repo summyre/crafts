@@ -1,9 +1,12 @@
 import React, { useRef, useState } from "react";
-import { View, Text, TextInput, FlatList, TouchableOpacity, Image, Alert, StyleSheet } from "react-native";
-import { usePatterns } from "../store/PatternsContext";
+import { View, Text, TextInput, FlatList, TouchableOpacity, Image, Alert, StyleSheet, Modal, Platform, ActivityIndicator } from "react-native";
 import { Pattern } from "../store/types";
 import { SketchCanvas } from '@terrylinla/react-native-sketch-canvas';
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import { WebView } from 'react-native-webview';
+import { Asset } from "expo-asset";
 import { useProjects } from "../store/ProjectsContext";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
@@ -20,6 +23,9 @@ export default function PatternWishlistScreen() {
     const [title, setTitle] = useState('');
     const [notes, setNotes] = useState('');
     const [imageUri, setImageUri] = useState<string | undefined>();
+    const [pdf, setPdf] = useState<Pattern['pdf']>();
+    const [pdfModalVisible, setPdfModalVisible] = useState(false);
+    const [pdfModalUri, setPdfModalUri] = useState<string | null>(null);
 
     if (!project) {
         return (
@@ -63,7 +69,8 @@ export default function PatternWishlistScreen() {
             id: Date.now().toString(),
             title,
             notes,
-            imageUri
+            imageUri,
+            pdf
         };
 
         setProjects(prev => prev.map(p => 
@@ -76,6 +83,7 @@ export default function PatternWishlistScreen() {
         setTitle('');
         setNotes('');
         setImageUri(undefined);
+        setPdf(undefined);
     };
 
     const pickImage = async () => {
@@ -83,6 +91,51 @@ export default function PatternWishlistScreen() {
         if (result.canceled) return;
         setImageUri(result.assets[0].uri);
     };
+
+    const pickPDf = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: 'application/pdf',
+                copyToCacheDirectory: true
+            });
+
+            if (result.canceled) return;
+            const asset = result.assets[0]
+            console.log('picked pdf:', asset.uri, asset.name);
+
+            let pdfUri = asset.uri;
+
+            if (Platform.OS === 'android') {
+                if (!pdfUri.startsWith('content://') && !pdfUri.startsWith('file://')) {
+                    pdfUri = 'file://' + pdfUri;
+                }
+            } else if (Platform.OS === 'ios') {
+                if (pdfUri.startsWith('/') && !pdfUri.startsWith('file://')) {
+                    pdfUri = 'file://' + pdfUri;
+                }
+            }
+            
+            const pickedPdf = {
+                uri: pdfUri,
+                name: asset.name,
+                addedAt: Date.now(),
+                size: asset.size,
+                mimeType: asset.mimeType
+            };
+            const copiedUri = `${FileSystem.Directory.pickDirectoryAsync}${pickedPdf.name}`;
+            await FileSystem.File.pickFileAsync();
+            setPdf({ ...pickedPdf, uri: copiedUri });
+            
+        } catch (error) {
+            console.error('Error picking PDF:', error);
+            Alert.alert('Error', 'Failed to pick PDF file');
+        }
+    };
+
+    const openPDFModal = async (pdfUri: string) => {
+        setPdfModalUri(pdfUri);
+        setPdfModalVisible(true);
+    }
     
     const renderWishlist = (item: Pattern) => {
         return (
@@ -100,6 +153,18 @@ export default function PatternWishlistScreen() {
                         <Text style={styles.notes}>{item.notes}</Text>
                     ): null}
                 </TouchableOpacity>
+
+                {item.pdf && (
+                    <TouchableOpacity style={{marginTop: 8}} onPress={() => openPDFModal(item.pdf!.uri)}>
+                        <Text style={styles.pdfText}>Open PDF ({item.pdf.name})</Text>
+                    </TouchableOpacity>
+                )}
+
+                {!item.imageUri && item.pdf ? (
+                    <View style={styles.placeholder}>
+                        <Text>PDF attached</Text>
+                    </View>
+                ) : null}
 
                 <TouchableOpacity onPress={() => deletePattern(item.id)}>
                     <Text style={styles.deleteText}>Delete</Text>
@@ -121,7 +186,7 @@ export default function PatternWishlistScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Pattern Wishlist</Text>
+            <Text style={styles.title}>Pattern</Text>
 
             <TextInput
                 style={styles.input}
@@ -139,20 +204,48 @@ export default function PatternWishlistScreen() {
             <TouchableOpacity style={styles.pickButton} onPress={pickImage}>
                 <Text style={{color: '#fff'}}>{imageUri ? 'Change Image' : 'Pick Image'}</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.pickButton} onPress={pickPDf}>
+                <Text style={{color: '#fff'}}>{pdf ? 'Change PDF' : 'Attach PDF'}</Text>
+            </TouchableOpacity>
             
             {imageUri && <Image source={{uri: imageUri}} style={styles.image} />}
             <TouchableOpacity style={styles.saveButton} onPress={addPattern}>
                 <Text style={{color: '#fff', fontWeight: 'bold'}}>Add Pattern</Text>
             </TouchableOpacity>
+
+            {pdf && (
+                <Text style={styles.mutedText}>{pdf.name ?? 'PDF attached'}</Text>
+            )}
             
             {wishlist.length === 0 ? (
-                <Text style={styles.mutedText}>No patterns in wishlist yet</Text>
+                <Text style={styles.mutedText}>No patterns yet</Text>
             ) : (
                 <FlatList
                     data={wishlist}
                     keyExtractor={item => item.id}
                     renderItem={({item}) => renderWishlist(item)}/>
             )}
+
+            <Modal
+                visible={pdfModalVisible}
+                onRequestClose={() => setPdfModalVisible(false)}
+                animationType='slide'>
+                    <View style={{flex: 1}}>
+                        <TouchableOpacity style={{padding: 12, backgroundColor: '#555'}} onPress={() => setPdfModalVisible(false)}>
+                            <Text style={{color: '#fff'}}>Close PDF</Text>
+                        </TouchableOpacity>
+                        {pdfModalUri ? (
+                            <WebView
+                                source={{uri: pdfModalUri}}
+                                style={{flex: 1}}
+                                startInLoadingState
+                                renderLoading={() => (
+                                    <ActivityIndicator size='large' color='#0000ff' style={{flex: 1, justifyContent: 'center'}} />
+                                )}
+                            />
+                        ) : null}
+                    </View>
+            </Modal>
         </View>
     )
 };
@@ -233,5 +326,9 @@ const styles = StyleSheet.create({
     },
     textArea: {
         height: 80
+    },
+    pdfText: {
+        color: '#2563eb',
+        fontWeight: '600'
     }
 })
