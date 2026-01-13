@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
 
-export const useTimer = () =>{
-    const [seconds, setSeconds] = useState<number>(0);
-    const [running, setRunning] = useState<boolean>(false);
+export const useTimer = (initialSeconds = 0) =>{
+    const [seconds, setSeconds] = useState(initialSeconds);
+    const [running, setRunning] = useState(false);
 
     useEffect(() => {
-        if (!running) return;
+        let interval: NodeJS.Timeout | null = null;
 
-        const interval = setInterval(() => {
-            setSeconds(prev => prev + 1);
-        }, 1000);
+        if (running) {
+            interval = setInterval(() => {
+                setSeconds(prev => prev + 1);
+            }, 1000);
+        }
 
-        return () => clearInterval(interval);
+        return () => {
+            if (interval) clearInterval(interval);
+        };
     }, [running]);
 
     const start = () => setRunning(true);

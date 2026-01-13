@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Alert, ScrollView } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
@@ -15,7 +15,7 @@ const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    return hours > 0 ? `${hours}h ${minutes}m` : `${seconds}m`;
 };
 
 export default function ProjectDetailScreen() {
@@ -143,25 +143,25 @@ export default function ProjectDetailScreen() {
     const renderTimelineItem = ({item}: {item: TimelineItem}) => {
         if (item.type === 'session') {
             const session = project.sessions.find(s => s.id === item.sessionId);
-            if (!session) return null;
+            if (!session) {
+                return (
+                    <View style={styles.timelineCard}>
+                        <Text style={styles.mutedText}>Session not found (may have been deleted)</Text>
+                    </View>
+                );
+            };
 
             return (
-                <TouchableOpacity 
-                    style={styles.timelineImage} 
-                    onPress={() => navigation.navigate('SessionDetail', {projectId, sessionId: item.sessionId})}>
-                        <View style={styles.sessionBadge}>
-                            <Text style={styles.sessionBadgeText}>Session</Text>
-                        </View>
-                    <View style={styles.timelineContent}>
-                        <Text style={styles.photoTitle}>{new Date(item.createdAt).toLocaleDateString()}</Text>
-                        <Text style={styles.notes}>
-                            Rows: {session.counters.rows} |
-                            Inc: {session.counters.increase} |
-                            Dec: {session.counters.decrease}
-                        </Text>
-                        <Text style={styles.timestamp}>Time: {formatTime(session.counters.seconds)}</Text>
-                    </View>
-                </TouchableOpacity>
+                <View style={styles.timelineCard}>
+                    <Text style={styles.timelineTitle}>Stitch Session</Text>
+                    
+                    {Object.entries(session.counters.values).map(([name, value]) => (
+                        <Text key={name} style={styles.counterText}>{name}: {value}</Text>
+                    ))}
+
+                    <Text style={styles.timeText}>Time: {formatTime(session.seconds)}</Text>
+                    <Text style={styles.dateText}>{new Date(session.createdAt).toLocaleString()}</Text>
+                </View>
             );
         }
 
@@ -187,20 +187,11 @@ export default function ProjectDetailScreen() {
             if (!pattern) return null;
         
             return (
-                <TouchableOpacity
-                    style={styles.timelineItem}
-                    onPress={() => navigation.navigate('PatternAnnotate', {projectId, timelineItemId: item.id})}>
-                        <View style={[styles.sessionBadge, {backgroundColor: '#e6f7ff'}]}>
-                            <Text style={[styles.sessionBadgeText, {color: '#1890ff'}]}>Pattern</Text>
-                        </View>
-                        <View style={styles.timelineContent}>
-                            <Text style={styles.photoTitle}>{pattern.title}</Text>
-                            <Text style={styles.timestamp}>Added: {new Date(item.createdAt).toLocaleDateString()}</Text>
-                            {item.annotations && item.annotations.length > 0 && (
-                                <Text style={styles.notes}>Notes: {item.annotations.join(', ')}</Text>
-                            )}
-                        </View>
-                </TouchableOpacity>
+                <View style={styles.timelineCard}>
+                    <Text style={styles.timelineTitle}>Pattern Added</Text>
+                    <Text style={styles.patternTitle}>{pattern.title}</Text>
+                    <Text style={styles.dateText}>{new Date(item.createdAt).toLocaleString()}</Text>
+                </View>
             );
         }
         return null;
@@ -227,14 +218,8 @@ export default function ProjectDetailScreen() {
                         <Text style={{color:item.isMilestone ? 'gold': '#444'}}>{item.isMilestone ? 'Milestone' : 'Mark as Milestone'}</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.notes}>
-                        Rows: {item.counters.rows}
-                        Inc: {item.counters.increase}
-                        Dec: {item.counters.decrease}
-                    </Text>
-
                     <Text style={styles.timestamp}>
-                        Time: {formatTime(item.counters.seconds)}
+                        Time: {formatTime(item.seconds)}
                     </Text>
             </TouchableOpacity>
         );
@@ -242,10 +227,32 @@ export default function ProjectDetailScreen() {
 
     const handleLinkPattern = () => { navigation.navigate('PatternPicker', {projectId}); };
 
+    const sortedTimeline = [...(project.timeline || [])].sort((a,b) => b.createdAt - a.createdAt);
+    const sortedSessions = [...project.sessions].sort((a,b) => b.createdAt - a.createdAt);
+    const sortedPhotos = [...project.photos].sort((a,b) => b.createdAt - a.createdAt);
+    
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{project.title}</Text>
 
+            <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('StitchSession', {projectId})}>
+                <Text style={styles.startButtonText}>Start Session</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.sectionTitle}>Timeline</Text>
+
+            {sortedTimeline.length > 0 ? (
+                <FlatList
+                    data={sortedTimeline}
+                    keyExtractor={item => item.id}
+                    renderItem={renderTimelineItem}
+                    scrollEnabled={true}
+                    style={styles.timelineList}
+                    ListFooterComponent={<View style={styles.sectionSpacer}/>} />
+            ) : (
+                <Text style={styles.mutedText}>Timeline is empty. Start a session or add a photo</Text>
+            )}
+            
             <Text style={styles.sectionHeader}>Linked Patterns</Text>
             <TouchableOpacity style={styles.addButton} onPress={handleLinkPattern}>
                 <Text>+ Link Pattern</Text>
@@ -282,32 +289,16 @@ export default function ProjectDetailScreen() {
                 <Text style={styles.emptyText}>No patterns linked</Text>
             )}
 
-            <Text style={styles.sectionHeader}>Timeline</Text>
-            {project.timeline && project.timeline.length > 0 ? (
-                <FlatList
-                    data={[...project.timeline].sort((a,b) => b.createdAt - a.createdAt)}
-                    keyExtractor={item => item.id}
-                    renderItem={renderTimelineItem} 
-                    scrollEnabled={false}
-                    style={styles.timelineList} />
-            ): (
-                <Text style={styles.emptyText}>Timeline is empty. Add sessions, photos or patterns</Text>
-            )}
-
             <Text style={styles.sectionHeader}>Sessions</Text>
-            <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => navigation.navigate('StitchSession', {projectId})}>
-                    <Text style={styles.addButtonText}>+ New Session</Text>
-            </TouchableOpacity>
 
-            {project.sessions.length > 0 ? (
+            {sortedSessions.length > 0 ? (
                 <FlatList
-                    data={[...project.sessions].sort((a,b) => b.createdAt - a.createdAt)}
+                    data={sortedSessions}
                     keyExtractor={(item) => item.id}
                     renderItem={renderSession}
-                    scrollEnabled={false}
+                    scrollEnabled={true}
                     style={styles.timelineList}
+                    ListFooterComponent={<View style={styles.sectionSpacer}/>}
                     />
             ) : (
                 <Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>
@@ -320,13 +311,14 @@ export default function ProjectDetailScreen() {
                     <Text style={styles.addButtonText}>+ Add Photo</Text>
             </TouchableOpacity>
 
-            {project.photos.length > 0 ? (
+            {sortedPhotos.length > 0 ? (
             <FlatList
-                data={[...project.photos].sort((a,b) => b.createdAt - a.createdAt)}
+                data={sortedPhotos}
                 keyExtractor={(item) => item.id}
                 renderItem={renderPhoto}
-                scrollEnabled={false}
-                style={styles.timelineList} />
+                scrollEnabled={true}
+                style={styles.timelineList}
+                ListFooterComponent={<View style={styles.sectionSpacer}/>} />
             ) : (
                 <Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>
             )}
@@ -354,7 +346,9 @@ const styles = StyleSheet.create({
     },
     photo: {
         width: '100%',
-        height: '100%',
+        height: 200,
+        borderRadius: 8,
+        marginTop: 8
     },
     photoTitle: {
         fontSize: 14,
@@ -440,11 +434,15 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: 'bold'
     },
-    sectionHeader: {
-        fontSize: 16,
+    sectionTitle: {
+        fontSize: 18,
         fontWeight: 'bold',
         marginTop: 16,
         marginBottom: 8
+    },
+    sectionHeader: {
+        fontSize: 18,
+        fontWeight: 'bold'
     },
     milestoneButton: {
         marginTop: 8,
@@ -474,4 +472,48 @@ const styles = StyleSheet.create({
     timelineList: {
         marginBottom: 16
     },
+    startButton: {
+        padding: 14,
+        backgroundColor: '#333',
+        borderRadius: 10,
+        alignItems: 'center',
+        marginBottom: 8
+    },
+    startButtonText: {
+        color: 'white',
+        fontWeight: 'bold'
+    },
+    timelineCard: {
+        borderWidth: 1,
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 10
+    },
+    timelineTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 6
+    },
+    counterText: {
+        fontSize: 14
+    },
+    timeText: {
+        marginTop: 6,
+        fontStyle: 'italic'
+    },
+    dateText: {
+        marginTop: 6,
+        fontSize: 12,
+        color: '#555'
+    },
+    mutedText: {
+        color: '#777',
+        fontStyle: 'italic'
+    },
+    sectionSpacer: {
+        height: 20
+    },
+    sectionContainer: {
+        marginBottom: 16
+    }
 });

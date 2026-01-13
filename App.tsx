@@ -25,6 +25,7 @@ import { ProjectsProvider } from './store/ProjectsContext';
 import { CollectionProvider } from './store/CollectionContext';
 import { ThemeProvider } from './theme/ThemeContext';
 import { PatternsProvider } from './store/PatternsContext';
+import { CurrencyProvider } from './store/CurrenciesContext';
 
 enableScreens();
 
@@ -54,80 +55,82 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <CollectionProvider>
-          <PatternsProvider>
-            <ProjectsProvider>
-              <NavigationContainer>
-                <Stack.Navigator screenOptions={{ headerShown: true, }}>
-                  <Stack.Screen
-                    name = "Home"
-                    component={HomeScreen}
-                    options={{ title: 'Home' }}/>
-                  <Stack.Screen
-                    name = "Collection"
-                    component={CollectionScreen}
-                    options={{ title: 'Collection' }}/>
+        <CurrencyProvider>
+          <CollectionProvider>
+            <PatternsProvider>
+              <ProjectsProvider>
+                <NavigationContainer>
+                  <Stack.Navigator screenOptions={{ headerShown: true, }}>
                     <Stack.Screen
-                    name = "Projects"
-                    component={ProjectScreen}
-                    options={{ title: 'Projects' }}/>
-                  <Stack.Screen
-                    name = "ProjectDetail"
-                    component={ProjectDetailScreen}
-                    options={{ title: 'Project' }}/>
-                  <Stack.Screen
-                    name = "ProjectEdit"
-                    component={ProjectEditScreen}
-                    options={{ title: 'Project' }}/>
-                  <Stack.Screen
-                    name = "PhotoDetail"
-                    component={PhotoDetailScreen}
-                    options={{ title: 'Photo' }}/>
-                  <Stack.Screen
-                    name = "CollectionAdd"
-                    component={AddItemScreen}
-                    options={{ title: 'Add New Item' }}/>
-                  <Stack.Screen
-                    name = "StitchSession"
-                    component={StitchSessionScreen}
-                    options={{ title: 'Session' }}/>
-                  <Stack.Screen
-                    name = "SessionDetail"
-                    component={SessionDetailScreen}
-                    options={{ title: 'Session' }}/>
-                  <Stack.Screen
-                    name = "CostCalculator"
-                    component={CostScreen}
-                    options={{ title: 'Cost Calculator' }}/>
-                  <Stack.Screen
-                    name = "PatternAnnotate"
-                    component={PatternAnnotateScreen}
-                    options={{ title: 'Annotate Pattern' }}/>
-                  <Stack.Screen
-                    name = "PatternPicker"
-                    component={PatternPickerScreen}
-                    options={{ title: 'Pattern Picker' }}/>
-                  <Stack.Screen
-                    name = "PatternWishlist"
-                    component={PatternWishlistScreen}
-                    options={{ title: 'Pattern Wishlist' }}/>
-                  <Stack.Screen
-                    name = "Settings"
-                    component={SettingsScreen}
-                    options={{ title: 'Settings' }}/>
-                  <Stack.Screen
-                    name = "ProjectDefaults"
-                    component={ProjectDefaultsScreen}
-                    options={{ title: 'Project Defaults' }}/>
-                  <Stack.Screen
-                    name = "HelpDoc"
-                    component={HelpDocScreen}
-                    options={{ title: 'Help and Documentation' }}/>
-                </Stack.Navigator>
-              </NavigationContainer>
-            </ProjectsProvider>
-          </PatternsProvider>
-        </CollectionProvider>
+                      name = "Home"
+                      component={HomeScreen}
+                      options={{ title: 'Home' }}/>
+                    <Stack.Screen
+                      name = "Collection"
+                      component={CollectionScreen}
+                      options={{ title: 'Collection' }}/>
+                      <Stack.Screen
+                      name = "Projects"
+                      component={ProjectScreen}
+                      options={{ title: 'Projects' }}/>
+                    <Stack.Screen
+                      name = "ProjectDetail"
+                      component={ProjectDetailScreen}
+                      options={{ title: 'Project' }}/>
+                    <Stack.Screen
+                      name = "ProjectEdit"
+                      component={ProjectEditScreen}
+                      options={{ title: 'Project' }}/>
+                    <Stack.Screen
+                      name = "PhotoDetail"
+                      component={PhotoDetailScreen}
+                      options={{ title: 'Photo' }}/>
+                    <Stack.Screen
+                      name = "CollectionAdd"
+                      component={AddItemScreen}
+                      options={{ title: 'Add New Item' }}/>
+                    <Stack.Screen
+                      name = "StitchSession"
+                      component={StitchSessionScreen}
+                      options={{ title: 'Session' }}/>
+                    <Stack.Screen
+                      name = "SessionDetail"
+                      component={SessionDetailScreen}
+                      options={{ title: 'Session' }}/>
+                    <Stack.Screen
+                      name = "CostCalculator"
+                      component={CostScreen}
+                      options={{ title: 'Cost Calculator' }}/>
+                    <Stack.Screen
+                      name = "PatternAnnotate"
+                      component={PatternAnnotateScreen}
+                      options={{ title: 'Annotate Pattern' }}/>
+                    <Stack.Screen
+                      name = "PatternPicker"
+                      component={PatternPickerScreen}
+                      options={{ title: 'Pattern Picker' }}/>
+                    <Stack.Screen
+                      name = "PatternWishlist"
+                      component={PatternWishlistScreen}
+                      options={{ title: 'Pattern Wishlist' }}/>
+                    <Stack.Screen
+                      name = "Settings"
+                      component={SettingsScreen}
+                      options={{ title: 'Settings' }}/>
+                    <Stack.Screen
+                      name = "ProjectDefaults"
+                      component={ProjectDefaultsScreen}
+                      options={{ title: 'Project Defaults' }}/>
+                    <Stack.Screen
+                      name = "HelpDoc"
+                      component={HelpDocScreen}
+                      options={{ title: 'Help and Documentation' }}/>
+                  </Stack.Navigator>
+                </NavigationContainer>
+              </ProjectsProvider>
+            </PatternsProvider>
+          </CollectionProvider>
+        </CurrencyProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

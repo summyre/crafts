@@ -1,8 +1,5 @@
 export type SessionCounters = {
-    rows: number;
-    increase: number;
-    decrease: number;
-    seconds: number;
+    values: Record<string, number>;
 };
 
 export type Session = {
@@ -14,6 +11,7 @@ export type Session = {
     //photoUri?: string;
     photos?: ProjectPhoto[];
     isMilestone?: boolean;
+    seconds: number;
 };
 
 export type ProjectPhoto = {

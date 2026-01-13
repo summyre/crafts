@@ -8,18 +8,22 @@ import { RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { useTheme } from "../theme/ThemeContext";
+import { CURRENCIES, LOCALE_CURRENCY_MAP } from "../store/currencies";
+//import { getAutoCurrency } from "./CostCalculator";
+import { useCurrency } from "../store/CurrenciesContext";
 
 type RouteProps = RouteProp<RootStackParamList, 'Settings'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const [currency, setCurrency] = useState('auto');
+    const { currencyCode, setCurrencyCode } = useCurrency();
     const [shakeToReturn, setShakeToReturn] = useState(false);
     const [tutorialEnabled, setTutorialEnabled] = useState(true);
-    const [manualCurrencyCode, setManualCurrencyCode] = useState('GBP');
+    //const [manualCurrencyCode, setManualCurrencyCode] = useState('GBP');
     const [showCurrencyModal, setShowCurrencyModal] = useState(false);
     const [showTutorialModal, setShowTutorialModal] = useState(false);
+    const [currencyDisplay, setCurrencyDisplay] = useState('');
     const navigation = useNavigation<NavProps>();
     const { theme, themeId, setThemeById } = useTheme();
 
@@ -31,19 +35,24 @@ export default function SettingsScreen() {
         {id: 'nature', name: 'Nature', colors: {primary: '#4CAF50', background: '#E8F5E9'}}
     ];
 
-    // currencies
-    const commonCurrencies = [
-        {code: 'GBP', name: 'British Pound', symbol: '£'},
-        {code: 'EUR', name: 'Euro', symbol: '€'},
-        {code: 'USD', name: 'US Dollar', symbol: '$'},
-        {code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$'},
-        {code: 'AUD', name: 'Australian Dollar', symbol: 'A$'},
-        {code: 'JPY', name: 'Japanese Yen', symbol: '¥'},
-    ]
-
     useEffect(() => {
         loadSettings();
     }, []);
+
+    useEffect(() => {
+        const updateDisplay = async () => {
+            if (currencyCode === 'auto') {
+                const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+                const autoCurrency = getAutoCurrencyFromLocale(locale);
+                setCurrencyDisplay(`Auto (${locale}) -> ${autoCurrency}`);
+            } else if (currencyCode === 'manual') {
+                setCurrencyDisplay('Manual (select currency)');
+            } else {
+                setCurrencyDisplay(currencyCode);
+            }
+        };
+        updateDisplay();
+    }, [currencyCode]);
 
     const loadSettings =  async () => {
         try {
@@ -54,7 +63,7 @@ export default function SettingsScreen() {
             const savedTutorial = await AsyncStorage.getItem('tutorialEnabled');
 
             if (savedTheme) setThemeById(savedTheme);
-            if (savedCurrency) setCurrency(savedCurrency);
+            if (savedCurrency) setCurrencyCode(savedCurrency);
             if (savedNotifications !== null) setNotificationsEnabled(JSON.parse(savedNotifications));
             if (savedShake !== null) setShakeToReturn(JSON.parse(savedShake));
             if (savedTutorial !== null) setTutorialEnabled(JSON.parse(savedTutorial));
@@ -91,28 +100,37 @@ export default function SettingsScreen() {
     };
 
     const handleCurrencyChange = async (value: string) => {
-        setCurrency(value);
-        await saveSetting('preferredCurrency', value);
+        await setCurrencyCode(value);
 
-        if (value !== 'manual') {
-            await saveSetting('manualCurrencyCode', manualCurrencyCode);
+        if (value === 'manual') {
+            setShowCurrencyModal(true);
         }
     };
 
     const handleManualCurrecySelect = async (code: string) => {
-        setManualCurrencyCode(code);
-        await saveSetting('manualCurrencyCode', code);
+        await AsyncStorage.setItem('manualCurrencyCode', JSON.stringify(code));
+        await setCurrencyCode(code);
         setShowCurrencyModal(false);
     };
 
-    const getCurrencyDisplay = () => {
-        if (currency === 'auto') {
-            const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-            return `Auto (${locale})`;
-        } else if (currency === 'manual') {
-            return `Manual (${manualCurrencyCode})`;
+    const getCurrencyDisplay = async () => {
+        if (currencyCode === 'auto') {
+            try {
+                const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+                const autoCurrency = getAutoCurrencyFromLocale(locale);
+                return `Auto (${locale}) -> ${autoCurrency}`;
+            } catch (error) {
+                return 'Auto (device locale)';
+            }
+        } else if (currencyCode === 'manual') {
+            const manual = await AsyncStorage.getItem('manualCurrencyCode');
+            return `Manual (${manual ? JSON.parse(manual) : 'Not set'})`;
         }
-        return currency;
+        return currencyCode;
+    };
+
+    const getAutoCurrencyFromLocale = (locale: string) => {
+        return LOCALE_CURRENCY_MAP[locale] ?? 'GBP';
     };
 
     const renderAdditionalSettings = () => (
@@ -199,21 +217,23 @@ export default function SettingsScreen() {
                 <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Currency</Text>
                 <View style={styles.option}>
                     <Text style={[styles.optionText, {color: theme.colors.text}]}>Cost Calculator Currency</Text>
-                    <Picker selectedValue={currency} onValueChange={handleCurrencyChange} style={{backgroundColor: theme.colors.card, color: theme.colors.text}}>
+                    <Picker selectedValue={currencyCode} onValueChange={handleCurrencyChange} style={{backgroundColor: theme.colors.card, color: theme.colors.text}}>
                         <Picker.Item label="Auto-detect (device locale)" value="auto" />
                         <Picker.Item label="Set manually" value="manual" />
-                        {/*{commonCurrencies.map((curr) => (
+                        {/*{CURRENCIES.map((curr) => (
                             <Picker.Item key={curr.code} label={`${curr.name} (${curr.symbol})`} value={curr.code} />
                         ))}*/}
                     </Picker>
 
-                    {currency === 'manual' && (
+                    {/* {currencyCode === 'manual' && (
                         <TouchableOpacity 
                             style={[styles.manualCurrencyButton, {backgroundColor: theme.colors.primary + '20'}]} 
                             onPress={() => setShowCurrencyModal(true)}>
                             <Text style={[styles.manualCurrencyText, {color: theme.colors.primary}]}>Select currency: {manualCurrencyCode}</Text>
                         </TouchableOpacity>
-                    )}
+                    )}*/}
+
+                    <Text style={styles.currentSelection}>Current: {getCurrencyDisplay()}</Text>
                 </View>
             </View>
 
@@ -283,7 +303,7 @@ export default function SettingsScreen() {
                         <View style={[styles.modalContent, {backgroundColor: theme.colors.card}]}>
                             <Text style={[styles.modalTitle, {color: theme.colors.text}]}>Select Currency</Text>
                             <ScrollView>
-                                {commonCurrencies.map((curr) => (
+                                {CURRENCIES.map((curr) => (
                                     <TouchableOpacity key={curr.code} style={styles.currencyItem} onPress={() => handleManualCurrecySelect(curr.code)}>
                                         <Text style={[styles.currencyText, {color: theme.colors.text}]}>{curr.code} - {curr.name} ({curr.symbol})</Text>
                                     </TouchableOpacity>
@@ -511,5 +531,10 @@ const styles = StyleSheet.create({
     },
     unitButtonText: {
         color: '#333'
+    },
+    currentSelection: {
+        padding: 12,
+        color: '#333',
+        textAlign: 'center'
     }
 });

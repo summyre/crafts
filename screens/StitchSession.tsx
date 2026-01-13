@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -30,14 +30,53 @@ const formatTime = (totalSeconds: number) => {
 export default function StitchSessionScreen() {
     const { projectId } = useRoute<RouteProps>().params;
     const navigation = useNavigation<NavProps>();
-    const { setProjects } = useProjects();
+    const { projects, setProjects } = useProjects();
+    const project = projects.find(p => p.id === projectId)
 
-    const rows = useCounter();
-    const increase = useCounter();
-    const decrease = useCounter();
-    const timer = useTimer();
+    if (!project) {
+        return (
+            <View style={styles.container}>
+                <Text>Project not found</Text>
+            </View>
+        );
+    }
+    
+    const { counters, addCounter, removeCounter, increment, decrement } = useCounter({values: {Rows: 0}});
+    const [newCounterName, setNewCounterName] = useState('');
+    const { seconds, start, pause, reset, running } = useTimer(0);
 
-    const finishSession = () => {
+    const handleSaveSession = () => {
+        if (Object.keys(counters.values).length === 0) {
+            Alert.alert('No counters', 'Add at least one before saving');
+            return;
+        }
+
+        const newSession: Session = {
+            id: Date.now().toString(),
+            createdAt: Date.now(),
+            counters,
+            isMilestone: false,
+            seconds
+        };
+        
+        const timelineItem: TimelineItem = {
+            id: `${newSession.id}-session`,
+            type: 'session',
+            sessionId: newSession.id,
+            createdAt: newSession.createdAt
+        };
+
+        setProjects(prev => prev.map(p =>
+            p.id === projectId ? {
+                ...p,
+                sessions: [newSession, ...p.sessions],
+                timeline: [timelineItem, ...(p.timeline || [])]
+            } : p
+        ));
+        navigation.goBack();
+    };
+    
+    {/*const finishSession = () => {
         const newSession: Session = {
             id: Date.now().toString(),
             createdAt: Date.now(),
@@ -65,51 +104,72 @@ export default function StitchSessionScreen() {
         ));
     
         navigation.replace('SessionDetail', { projectId, sessionId: newSession.id });
-    };
+    };*/}
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.timer}>{formatTime(timer.seconds)}</Text>
+        <View style={styles.container}>
+            <Text style={styles.title}>Stitch Session</Text>
+            
+            <View style={styles.timerRow}>
+                <Text style={styles.timerText}>
+                    Time: {Math.floor(seconds / 60)}m {seconds % 60}s
+                </Text>
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Rows</Text>
-                    <CounterButton label="-" onPress={rows.decrement} />
-                    <Text style={styles.counterValue}>{rows.value}</Text>
-                    <CounterButton label="+" onPress={rows.increment} />
-                </View>
-
-                <View style={styles.cardHalf}>
-                    <Text style={styles.sectionTitle}>Increase</Text>
-                    <CounterButton label="-" onPress={increase.decrement} />
-                    <Text style={styles.counterValue}>{increase.value}</Text>
-                    <CounterButton label="+" onPress={increase.increment} />
-                </View>
-
-                <View style={styles.cardHalf}>
-                    <Text style={styles.sectionTitle}>Decrease</Text>
-                    <CounterButton label="-" onPress={decrease.decrement} />
-                    <Text style={styles.counterValue}>{decrease.value}</Text>
-                    <CounterButton label="+" onPress={decrease.increment} />
-                </View>
-            </ScrollView>
-
-            <View style={styles.footer}>
-                {!timer.running ? (
-                    <TouchableOpacity onPress={timer.start}>
-                        <Text>Start</Text>
-                    </TouchableOpacity>
-                ) : (
-                    <TouchableOpacity onPress={timer.pause}>
-                        <Text>Pause</Text>
-                    </TouchableOpacity>
-                )}
-
-                <TouchableOpacity onPress={finishSession}>
-                    <Text>Finish Session</Text>
+                <TouchableOpacity style={styles.timerButton} onPress={running ? pause: start}>
+                    <Text style={styles.timerButton}>{running ? 'Pause' : 'Start'}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.timerButton} onPress={reset}>
+                    <Text style={styles.timerButton}>Reset</Text>
                 </TouchableOpacity>
             </View>
-        </SafeAreaView>
+
+            <Text style={styles.sectionTitle}>Counters</Text>
+            {Object.entries(counters.values).map(([name, value]) => (
+                <View key={name} style={styles.counterRow}>
+                    <Text style={styles.counterName}>{name}: {value}</Text>
+                    <View style={styles.counterButtons}>
+                        <TouchableOpacity style={styles.counterButton} onPress={() => increment(name)}>
+                            <Text>+</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.counterButton} onPress={() => decrement(name)}>
+                            <Text>-</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.removeButton} onPress={() => Alert.alert(
+                            'Remove Counter',
+                            `Remove "${name}"?`,
+                            [
+                                {text: 'Cancel', style: 'cancel'},
+                                {text: 'Remove', style: 'destructive', onPress: () => removeCounter(name)}
+                            ]
+                        )}>
+                            <Text style={{color: 'red'}}>X</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            ))}
+
+            <View style={styles.addCounterRow}>
+                <TextInput
+                    placeholder='New counter name'
+                    value={newCounterName}
+                    onChangeText={setNewCounterName}
+                    style={styles.input} />
+                
+                <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={() => {
+                        addCounter(newCounterName);
+                        setNewCounterName('');
+                    }}>
+                        <Text style={styles.addButtonText}>Add</Text>
+                </TouchableOpacity>
+            </View>
+            
+            <TouchableOpacity style={styles.saveButton} onPress={handleSaveSession}>
+                <Text style={styles.saveButtonText}>Save session</Text>
+            </TouchableOpacity>
+        </View>
     );
 };
 
@@ -119,6 +179,11 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#fff',
     },
+    title: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 16
+    },
     header: {
         alignItems: 'center',
         marginBottom: 8,
@@ -127,10 +192,16 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
-    timer: {
+    timerRow: {
         textAlign: 'center',
         fontSize: 16,
         marginVertical: 8,
+    },
+    timerButton: {
+        padding: 12
+    },
+    timerText: {
+        fontSize: 12
     },
     card: {
         borderWidth: 1,
@@ -149,11 +220,18 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 8,
         fontWeight: 'bold',
+        marginTop: 16
     },
     counterRow: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 12,
+        marginBottom: 8
+    },
+    counterButtons: {
+        flexDirection: 'row',
+        gap: 8
     },
     counterButton: {
         borderWidth: 1,
@@ -163,6 +241,11 @@ const styles = StyleSheet.create({
     },
     counterButtonText: {
         fontSize: 18,
+    },
+    counterName: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 8
     },
     counterValue: {
         fontSize: 18,
@@ -192,5 +275,41 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 16,
+    },
+    removeButton: {
+        padding: 8,
+        marginLeft: 8
+    },
+    addCounterRow: {
+     flexDirection: 'row',
+     marginTop: 12,
+     gap: 8   
+    },
+    input: {
+        flex: 1,
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 10
+    },
+    addButton: {
+        paddingHorizontal: 16,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 8
+    },
+    addButtonText: {
+        fontWeight: 'bold'
+    },
+    saveButton: {
+        marginTop: 24,
+        padding: 16,
+        borderRadius: 10,
+        backgroundColor: '#333',
+        alignItems: 'center'
+    },
+    saveButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16
     }
 })

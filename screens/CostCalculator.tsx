@@ -3,23 +3,16 @@ import { View, Text, TextInput, StyleSheet, ScrollView, Pressable } from "react-
 import { CostResult } from "../store/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { CURRENCIES, LOCALE_CURRENCY_MAP } from "../store/currencies";
+import { useCurrency } from "../store/CurrenciesContext";
 
-const localeCurrencyMap: Record<string, string> = {
-    "en-GB": "GBP",
-    "en-US": "USD",
-    "de-DE": "EUR",
-    "fr-FR": "EUR",
-    "it-IT": "EUR",
-    "es-ES": "EUR",
-    "ja-JP": "JPY",
-    "en-AU": "AUD",
-    "en-CA": "CAD",
-    "ms-MY": "MYR"
-}
-
-const getAutoCurrency = () => {
+export const getAutoCurrency = () => {
+    try {
     const deviceLocale = Intl.DateTimeFormat().resolvedOptions().locale;
-    return localeCurrencyMap[deviceLocale] ?? "GBP";
+    return LOCALE_CURRENCY_MAP[deviceLocale] ?? "GBP";
+    } catch (error) {
+        return 'GBP';
+    }
 };
 
 export default function CostScreen() {
@@ -31,27 +24,7 @@ export default function CostScreen() {
     const [extraCosts, setExtraCosts] = useState('');
     const [profitMargin, setProfitMargin] = useState('');
     const [result, setResult] = useState<CostResult | null>();
-    const [currencyCode, setCurrencyCode] = useState<string>('GBP');
-
-    const loadCurrency = async () => {
-        try {
-            const pref = await AsyncStorage.getItem('preferredCurrency');
-            const manual = await AsyncStorage.getItem('manualCurrencyCode');
-
-            if (pref === 'manual' && manual) {
-                setCurrencyCode(JSON.parse(manual));
-            } else if (pref && pref !== 'auto') {
-                setCurrencyCode(JSON.parse(pref));
-            } else {
-                setCurrencyCode(getAutoCurrency());
-            }
-        } catch (error) {
-            console.error('Error loading currency:', error);
-            setCurrencyCode(getAutoCurrency());
-        }
-    };
-
-    useFocusEffect(useCallback(() => {loadCurrency();}, []));
+    const { currencyCode } = useCurrency();
 
     const calculateCost = () => {
         const yarnCost = (Number(yarnUsed) / Number(skeinSize)) * Number(skeinPrice);
@@ -65,11 +38,34 @@ export default function CostScreen() {
         });
     };
 
+    const resolveCurrencyCode = () => {
+        if (currencyCode === 'auto') {
+            const auto = getAutoCurrency();
+            return typeof auto === 'string' && auto.length === 3 ? auto : 'GBP';
+        }
+
+        if (currencyCode === 'manual') {
+            return 'GBP';
+        }
+
+        if (typeof currencyCode === 'string' && currencyCode.length === 3) { return currencyCode; }
+
+        return 'GBP';
+    };
+
     const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat(undefined, {
-            style: "currency",
-            currency: currencyCode,
-        }).format(value);
+        try {
+            const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+            const resolvedCurrency = resolveCurrencyCode();
+
+            return new Intl.NumberFormat(locale, {
+                style: "currency",
+                currency: resolvedCurrency
+            }).format(value);
+        } catch (error) {
+            console.error('Currency formatting error:', error);
+            return `${currencyCode} ${value.toFixed(2)}`;
+        }
     };
 
     return (
