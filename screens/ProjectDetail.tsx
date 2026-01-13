@@ -153,7 +153,9 @@ export default function ProjectDetailScreen() {
 
             return (
                 <View style={styles.timelineCard}>
-                    <Text style={styles.timelineTitle}>Stitch Session</Text>
+                    <View style={styles.sessionBadge}>
+                        <Text style={styles.sessionBadgeText}>SESSION</Text>
+                    </View>
                     
                     {Object.entries(session.counters.values).map(([name, value]) => (
                         <Text key={name} style={styles.counterText}>{name}: {value}</Text>
@@ -170,15 +172,20 @@ export default function ProjectDetailScreen() {
             if (!photo) return null;
 
             return (
-                <TouchableOpacity
-                    style={styles.timelineItem}
-                    onPress={() => navigation.navigate('PhotoDetail', {projectId, photoId: item.photoId})}>
-                        <Image source={{uri: photo.uri}} style={styles.timelineImage} />
-                        <View style={styles.timelineContent}>
-                            <Text style={styles.photoTitle}>{photo.title || 'Progress photo'}</Text>
-                            <Text style={styles.timestamp}>{new Date(item.createdAt).toLocaleDateString()}</Text>
-                        </View>
-                </TouchableOpacity>
+                <View style={styles.timelineCard}>
+                    <View style={styles.sessionBadge}>
+                        <Text style={styles.sessionBadgeText}>PHOTO</Text>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.timelineItem}
+                        onPress={() => navigation.navigate('PhotoDetail', {projectId, photoId: item.photoId})}>
+                            <Image source={{uri: photo.uri}} style={styles.timelineImage} />
+                            <View style={styles.timelineContent}>
+                                <Text style={styles.photoTitle}>{photo.title || 'Progress photo'}</Text>
+                                <Text style={styles.timestamp}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                            </View>
+                    </TouchableOpacity>
+                </View>
             );
         }
 
@@ -188,7 +195,9 @@ export default function ProjectDetailScreen() {
         
             return (
                 <View style={styles.timelineCard}>
-                    <Text style={styles.timelineTitle}>Pattern Added</Text>
+                    <View style={styles.sessionBadge}>
+                        <Text style={styles.sessionBadgeText}>PATTERN</Text>
+                    </View>
                     <Text style={styles.patternTitle}>{pattern.title}</Text>
                     <Text style={styles.dateText}>{new Date(item.createdAt).toLocaleString()}</Text>
                 </View>
@@ -232,109 +241,132 @@ export default function ProjectDetailScreen() {
     const sortedPhotos = [...project.photos].sort((a,b) => b.createdAt - a.createdAt);
     
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>{project.title}</Text>
+        <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollViewContainer}
+            showsVerticalScrollIndicator={true}>
+                <View style={styles.headerContainer}>
+                    <Text style={styles.title}>{project.title}</Text>
 
-            <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('StitchSession', {projectId})}>
-                <Text style={styles.startButtonText}>Start Session</Text>
-            </TouchableOpacity>
-            
-            <Text style={styles.sectionTitle}>Timeline</Text>
+                    <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('StitchSession', {projectId})}>
+                        <Text style={styles.startButtonText}>Start Session</Text>
+                    </TouchableOpacity>
+                    
+                    <Text style={styles.sectionTitle}>Timeline</Text>
 
-            {sortedTimeline.length > 0 ? (
-                <FlatList
-                    data={sortedTimeline}
-                    keyExtractor={item => item.id}
-                    renderItem={renderTimelineItem}
-                    scrollEnabled={true}
-                    style={styles.timelineList}
-                    ListFooterComponent={<View style={styles.sectionSpacer}/>} />
-            ) : (
-                <Text style={styles.mutedText}>Timeline is empty. Start a session or add a photo</Text>
-            )}
-            
-            <Text style={styles.sectionHeader}>Linked Patterns</Text>
-            <TouchableOpacity style={styles.addButton} onPress={handleLinkPattern}>
-                <Text>+ Link Pattern</Text>
-            </TouchableOpacity>
-            {linkedPatterns.length > 0 ? (
-                linkedPatterns.map(pattern => (
+                    {sortedTimeline.length > 0 ? (
+                        <View style={styles.listContainer}>
+                            {sortedTimeline.map((item) => (
+                                <View key={item.id}>
+                                    {renderTimelineItem({item})}
+                                </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={styles.mutedText}>Timeline is empty. Start a session or add a photo</Text>
+                    )}
+                    
+                    <View style={styles.compactSection}>
+                        <View style={styles.sectionHeaderRow}>
+                            <Text style={styles.sectionHeader}>Linked Patterns</Text>
+                            <TouchableOpacity style={styles.smallAddButton} onPress={handleLinkPattern}>
+                                <Text style={styles.smallAddButtonText}>+ Link Pattern</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {linkedPatterns.length > 0 ? (
+                            <View style={styles.compactPatternContainer}>
+                                {linkedPatterns.map(pattern => (
+                                    <TouchableOpacity
+                                        key={pattern.id}
+                                        style={styles.compactPatternItem}
+                                        onPress={() => {
+                                            const inTimeline = project.timeline?.some(item =>
+                                                item.type === 'pattern' && item.patternId === pattern.id
+                                            );
+
+                                            if (!inTimeline) {
+                                                importPatternToTimeline(pattern.id);
+                                                Alert.alert('Success', 'Pattern added');
+                                            } else {
+                                                navigation.navigate('PatternAnnotate', {
+                                                    projectId,
+                                                    timelineItemId: project.timeline.find(item =>
+                                                        item.type === 'pattern' && item.patternId === pattern.id
+                                                    )?.id || ''
+                                                });
+                                            }
+                                        }}>
+                                            <Text style={styles.compactPatternTitle}>{pattern.title}</Text>
+                                            {pattern.link && (
+                                                <Text style={styles.compactPatternLink} numberOfLines={1}>{pattern.link}</Text>
+                                            )}
+                                        </TouchableOpacity>
+                                ))}
+                            </View>
+                        ): (
+                            <Text style={styles.emptyText}>No patterns linked</Text>
+                        )}
+                    </View>
+
+                    <Text style={styles.sectionHeader}>Sessions</Text>
+
+                    {sortedSessions.length > 0 ? (
+                        <View style={styles.listContainer}>
+                            {sortedSessions.map((item) => (
+                                <View key={item.id}>
+                                    {renderSession({item})}
+                                </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>
+                    )}
+
+                    <Text style={styles.sectionHeader}>Photos</Text>
                     <TouchableOpacity
-                        key={pattern.id}
-                        style={styles.patternItem}
-                        onPress={() => {
-                            const inTimeline = project.timeline?.some(item =>
-                                item.type === 'pattern' && item.patternId === pattern.id
-                            );
+                        style={styles.addButton}
+                        onPress={() => handleAddPhoto()}>
+                            <Text style={styles.addButtonText}>+ Add Photo</Text>
+                    </TouchableOpacity>
 
-                            if (!inTimeline) {
-                                importPatternToTimeline(pattern.id);
-                                Alert.alert('Success', 'Pattern added');
-                            } else {
-                                navigation.navigate('PatternAnnotate', {
-                                    projectId,
-                                    timelineItemId: project.timeline.find(item =>
-                                        item.type === 'pattern' && item.patternId === pattern.id
-                                    )?.id || ''
-                                });
-                            }
-                        }}>
-                            <Text style={styles.patternTitle}>{pattern.title}</Text>
-                            {pattern.link && (
-                                <Text style={styles.patternLink} numberOfLines={1}>{pattern.link}</Text>
-                            )}
-                        </TouchableOpacity>
-                ))
-            ): (
-                <Text style={styles.emptyText}>No patterns linked</Text>
-            )}
-
-            <Text style={styles.sectionHeader}>Sessions</Text>
-
-            {sortedSessions.length > 0 ? (
-                <FlatList
-                    data={sortedSessions}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderSession}
-                    scrollEnabled={true}
-                    style={styles.timelineList}
-                    ListFooterComponent={<View style={styles.sectionSpacer}/>}
-                    />
-            ) : (
-                <Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>
-            )}
-
-            <Text style={styles.sectionHeader}>Photos</Text>
-            <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => handleAddPhoto()}>
-                    <Text style={styles.addButtonText}>+ Add Photo</Text>
-            </TouchableOpacity>
-
-            {sortedPhotos.length > 0 ? (
-            <FlatList
-                data={sortedPhotos}
-                keyExtractor={(item) => item.id}
-                renderItem={renderPhoto}
-                scrollEnabled={true}
-                style={styles.timelineList}
-                ListFooterComponent={<View style={styles.sectionSpacer}/>} />
-            ) : (
-                <Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>
-            )}
-        </View>
+                    {sortedPhotos.length > 0 ? (
+                        <View style={styles.listContainer}>
+                            {sortedPhotos.map((item) => (
+                                <View key={item.id}>
+                                    {renderPhoto({item})}
+                                </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>
+                    )}
+                    <View style={styles.bottomSpacer}/>
+                </View>
+            </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        padding: 20,
+        paddingBottom: 40
+    },
+    headerContainer: {
+        paddingBottom: 20
+    },
+    scrollView: {
+        flex: 1,
+    },
+    scrollViewContainer: {
+        paddingBottom: 40,
+        paddingHorizontal: 10,
+        paddingVertical: 10
     },
     title: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 12,
+        marginBottom: 20,
     },
     photoCard: {
         flex: 1/3,
@@ -351,8 +383,9 @@ const styles = StyleSheet.create({
         marginTop: 8
     },
     photoTitle: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '600',
+        marginBottom: 4
     },
     subtitle: {
         fontSize: 14,
@@ -361,26 +394,42 @@ const styles = StyleSheet.create({
     },
     notes: {
         fontSize: 14,
-        marginVertical: 4,
+        marginVertical: 6,
         color: '#666',
+        lineHeight: 20
     },
     addButton: {
-        padding: 12,
+        padding: 16,
         borderWidth: 1,
-        borderRadius: 10,
+        borderRadius: 12,
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 24,
+    },
+    smallAddButton: {
+        padding: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ddd'
     },
     gallery: {
         paddingBottom: 20,
     },
     emptyText: {
         textAlign: 'center',
-        marginTop: 40,
+        marginTop: 20,
+        marginBottom: 30,
         color: '#222',
+        fontStyle: 'italic'
     },
     addButtonText: {
         fontWeight: 'bold',
+    },
+    smallAddButtonText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#555'
     },
     deleteButton: {
         marginTop: 24,
@@ -402,14 +451,15 @@ const styles = StyleSheet.create({
     timelineItem: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        marginBottom: 16,
+        marginBottom: 20,
         paddingBottom: 16,
         borderBottomWidth: 1,
         borderColor: '#333',
+        paddingHorizontal: 4
     },
     timelineImage: {
-        width: 80,
-        height: 80,
+        width: 70,
+        height: 70,
         borderRadius: 8,
         marginRight: 12,
         flexShrink: 0,
@@ -419,11 +469,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     timestamp: {
-        fontSize: 11,
+        fontSize: 12,
         color: '#777',
+        marginTop: 4
     },
     sessionBadge: {
-        backgroundColor: '#ddd',
+        backgroundColor: '#e0e7ff',
         borderRadius: 6,
         paddingHorizontal: 6,
         paddingVertical: 2,
@@ -435,18 +486,26 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     sectionTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        marginTop: 16,
-        marginBottom: 8
+        marginTop: 24,
+        marginBottom: 16
     },
     sectionHeader: {
         fontSize: 18,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        marginBottom: 12
+    },
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12
     },
     milestoneButton: {
-        marginTop: 8,
+        marginLeft: 10,
         padding: 6,
+        paddingHorizontal: 10,
         borderRadius: 6,
         borderWidth: 1,
         borderColor: 'gold',
@@ -469,51 +528,84 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         backgroundColor: '#fafafa'
     },
+    compactPatternTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 2
+    },
+    compactPatternLink: {
+        fontSize: 11
+    },
+    compactPatternItem: {
+        padding: 10,
+        borderWidth: 1,
+        borderRadius: 8,
+        marginBottom: 6,
+    },
+    compactPatternContainer: {
+        marginBottom: 8
+    },
     timelineList: {
-        marginBottom: 16
+        marginBottom: 8
+    },
+    listContainer: {
+        marginBottom: 24
     },
     startButton: {
-        padding: 14,
-        backgroundColor: '#333',
-        borderRadius: 10,
+        padding: 18,
+        backgroundColor: '#4f46e5',
+        borderRadius: 12,
         alignItems: 'center',
-        marginBottom: 8
+        marginBottom: 24,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.1,
+        shadowRadius:  4,
+        elevation: 3
     },
     startButtonText: {
         color: 'white',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        fontSize: 16
     },
     timelineCard: {
         borderWidth: 1,
-        borderRadius: 10,
-        padding: 12,
-        marginBottom: 10
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16
     },
     timelineTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        marginBottom: 6
+        marginBottom: 10
     },
     counterText: {
-        fontSize: 14
+        fontSize: 14,
+        marginBottom: 4
     },
     timeText: {
-        marginTop: 6,
+        marginTop: 8,
         fontStyle: 'italic'
     },
     dateText: {
-        marginTop: 6,
+        marginTop: 8,
         fontSize: 12,
         color: '#555'
     },
     mutedText: {
         color: '#777',
-        fontStyle: 'italic'
+        fontStyle: 'italic',
+        marginBottom: 24,
+        paddingVertical: 12,
+        textAlign: 'center'
+    },
+    compactSection: {
+        marginBottom: 24
     },
     sectionSpacer: {
         height: 20
     },
-    sectionContainer: {
-        marginBottom: 16
+    bottomSpacer: {
+        height: 60
     }
 });
