@@ -6,11 +6,11 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import { WebView } from 'react-native-webview';
-import { Asset } from "expo-asset";
 import { useProjects } from "../store/ProjectsContext";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import PDFViewer from "../hooks/pdfViewerV2";
 
 type RouteProps = RouteProp<RootStackParamList, 'PatternWishlist'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -92,7 +92,7 @@ export default function PatternWishlistScreen() {
         setImageUri(result.assets[0].uri);
     };
 
-    const pickPDf = async () => {
+    const pickPdf = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
                 type: 'application/pdf',
@@ -125,12 +125,29 @@ export default function PatternWishlistScreen() {
             const copiedUri = `${FileSystem.Directory.pickDirectoryAsync}${pickedPdf.name}`;
             await FileSystem.File.pickFileAsync();
             setPdf({ ...pickedPdf, uri: copiedUri });
-            
+
         } catch (error) {
             console.error('Error picking PDF:', error);
             Alert.alert('Error', 'Failed to pick PDF file');
         }
     };
+
+    {/*const pickPdf = async () => {
+        const result = await DocumentPicker.getDocumentAsync({
+            type: 'application/pdf'
+        });
+
+        if (result.canceled) return;
+
+        const asset = result.assets[0];
+        setPdf({
+            uri: asset.uri,
+            name: asset.name,
+            addedAt: Date.now()
+        });
+
+        openPDFModal(asset.uri);
+    }*/}
 
     const openPDFModal = async (pdfUri: string) => {
         setPdfModalUri(pdfUri);
@@ -204,7 +221,7 @@ export default function PatternWishlistScreen() {
             <TouchableOpacity style={styles.pickButton} onPress={pickImage}>
                 <Text style={{color: '#fff'}}>{imageUri ? 'Change Image' : 'Pick Image'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.pickButton} onPress={pickPDf}>
+            <TouchableOpacity style={styles.pickButton} onPress={pickPdf}>
                 <Text style={{color: '#fff'}}>{pdf ? 'Change PDF' : 'Attach PDF'}</Text>
             </TouchableOpacity>
             
@@ -245,6 +262,9 @@ export default function PatternWishlistScreen() {
                             />
                         ) : null}
                     </View>
+                    {/*{pdfModalUri && (
+                        <PDFViewer uri={pdfModalUri} />
+                    )}*/}
             </Modal>
         </View>
     )
