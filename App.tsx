@@ -27,6 +27,7 @@ import { ThemeProvider } from './theme/ThemeContext';
 import { PatternsProvider } from './store/PatternsContext';
 import { CurrencyProvider } from './store/CurrenciesContext';
 import EditWishlistPatternScreen from './screens/EditWishlistPattern';
+import { useShakeToReturn } from './hooks/shakeToReturn';
 
 enableScreens();
 
@@ -54,6 +55,11 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
+  function ShakeToReturnListener() {
+    useShakeToReturn();
+    return null;
+  }
+
   return (
     <SafeAreaProvider>
       <ThemeProvider>
@@ -62,6 +68,7 @@ export default function App() {
             <PatternsProvider>
               <ProjectsProvider>
                 <NavigationContainer>
+                  <ShakeToReturnListener/>
                   <Stack.Navigator screenOptions={{ headerShown: true, }}>
                     <Stack.Screen
                       name = "Home"

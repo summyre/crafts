@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Alert, Modal, TextInput, Linking } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -11,6 +10,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { CURRENCIES, LOCALE_CURRENCY_MAP } from "../store/currencies";
 //import { getAutoCurrency } from "./CostCalculator";
 import { useCurrency } from "../store/CurrenciesContext";
+import SettingsData from "./SettingsData";
 
 type RouteProps = RouteProp<RootStackParamList, 'Settings'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -45,7 +45,8 @@ export default function SettingsScreen() {
                 const autoCurrency = getAutoCurrencyFromLocale(locale);
                 setCurrencyDisplay(`Auto (${locale}) -> ${autoCurrency}`);
             } else if (currencyCode === 'manual') {
-                setCurrencyDisplay('Manual (select currency)');
+                const manual = await AsyncStorage.getItem('manualCurrencyCode');
+                setCurrencyDisplay(manual ? `${manual}` : 'Manual');
             } else {
                 setCurrencyDisplay(currencyCode);
             }
@@ -135,16 +136,9 @@ export default function SettingsScreen() {
     const renderAdditionalSettings = () => (
         <View style={styles.section}>
             <Text style={styles.sectionTitle}>Additional Settings</Text>
-            <TouchableOpacity style={styles.option} onPress={() => Alert.alert(
-                'Data Management',
-                'Export projects as PDF/CSV\nImport patterns\nClear cache',
-                [{text: 'OK'}]
-            )}>
-                <Text style={styles.optionText}>Data Management</Text>
-                <Text style={styles.optionSubtext}>Export, import, backup</Text>
-            </TouchableOpacity>
+            <SettingsData/>
 
-            <View style={styles.option}>
+            {/*<View style={styles.option}>
                 <Text style={styles.optionText}>Measurement Units</Text>
                 <View style={styles.row}>
                     <TouchableOpacity style={[styles.unitButton, styles.unitButtonActive]} onPress={() => saveSetting('units', 'metric')}>
@@ -154,7 +148,7 @@ export default function SettingsScreen() {
                         <Text style={styles.unitButtonText}>Imperial (inches)</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </View>*/}
 
             <TouchableOpacity style={styles.option} onPress={() => Linking.openURL('https://github.com/summyre/crafts')}>
                 <Text style={styles.optionText}>Privacy and Security</Text>
@@ -226,7 +220,7 @@ export default function SettingsScreen() {
                         </TouchableOpacity>
                     )}*/}
 
-                    <Text style={styles.currentSelection}>Current: {getCurrencyDisplay()}</Text>
+                    <Text style={styles.currentSelection}>Current: {currencyDisplay}</Text>
                 </View>
             </View>
 

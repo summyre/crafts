@@ -32,9 +32,9 @@ export const CurrencyProvider: React.FC<{children: React.ReactNode}> = ({childre
             let code = 'GBP';
             
             if (pref === 'manual' && manual) {
-                code = JSON.parse(manual);
+                code = manual;
             } else if (pref &&  pref !== 'auto') {
-                code = JSON.parse(pref);
+                code = pref;
             } else {
                 code = getAutoCurrency();
             }
@@ -54,10 +54,10 @@ export const CurrencyProvider: React.FC<{children: React.ReactNode}> = ({childre
 
         // determining how to save based on the code
         if (code === 'auto' || code === 'manual') {
-            await AsyncStorage.setItem('preferredCurrency', JSON.stringify(code));
+            await AsyncStorage.setItem('preferredCurrency', code);
         } else {
-            await AsyncStorage.setItem('preferredCurrency', JSON.stringify(code));
-            await AsyncStorage.setItem('manualCurrencyCode', JSON.stringify(code));
+            await AsyncStorage.setItem('preferredCurrency', 'manual');
+            await AsyncStorage.setItem('manualCurrencyCode', code);
         }
     };
 
