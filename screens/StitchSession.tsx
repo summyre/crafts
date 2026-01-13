@@ -12,12 +12,6 @@ import { useTimer } from "../hooks/useTimer";
 type RouteProps = RouteProp<RootStackParamList, 'StitchSession'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
 
-const CounterButton = ({ label, onPress, }: { label: string; onPress: () => void}) => (
-    <TouchableOpacity style={styles.counterButton} onPress={onPress}>
-        <Text style={styles.counterButtonText}>{label}</Text>
-    </TouchableOpacity>
-);
-
 const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -40,8 +34,10 @@ export default function StitchSessionScreen() {
             </View>
         );
     }
+
+    const defaultCounters = project.defaults?.counters?.length ? Object.fromEntries(project.defaults.counters.map(name => [name, 0])) : {Rows: 0};
     
-    const { counters, addCounter, removeCounter, increment, decrement } = useCounter({values: {Rows: 0}});
+    const { counters, addCounter, removeCounter, increment, decrement } = useCounter({values: defaultCounters});
     const [newCounterName, setNewCounterName] = useState('');
     const { seconds, start, pause, reset, running } = useTimer(0);
 

@@ -35,7 +35,7 @@ export type RootStackParamList = {
     Collection: undefined;
     Projects: undefined;
     Settings: undefined;
-    ProjectDefaults: undefined;
+    ProjectDefaults: {projectId: string};
     HelpDoc: undefined;
     ProjectDetail: {projectId: string};
     ProjectEdit: {projectId?: string} | undefined;

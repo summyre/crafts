@@ -32,6 +32,7 @@ export type Project = {
     timeline: TimelineItem[];
     patternIds?: string[];
     patternWishlist?: Pattern[];
+    defaults?: ProjectDefaults;
 };
 
 export type CostResult = {
@@ -69,3 +70,8 @@ export type TimelineItem =
         createdAt: number;
         annotations?: string[];
     };
+
+export type ProjectDefaults = {
+    counters: string[];
+    craftType?: string;
+};

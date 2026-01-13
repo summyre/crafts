@@ -20,7 +20,6 @@ export default function SettingsScreen() {
     const { currencyCode, setCurrencyCode } = useCurrency();
     const [shakeToReturn, setShakeToReturn] = useState(false);
     const [tutorialEnabled, setTutorialEnabled] = useState(true);
-    //const [manualCurrencyCode, setManualCurrencyCode] = useState('GBP');
     const [showCurrencyModal, setShowCurrencyModal] = useState(false);
     const [showTutorialModal, setShowTutorialModal] = useState(false);
     const [currencyDisplay, setCurrencyDisplay] = useState('');
@@ -136,12 +135,6 @@ export default function SettingsScreen() {
     const renderAdditionalSettings = () => (
         <View style={styles.section}>
             <Text style={styles.sectionTitle}>Additional Settings</Text>
-
-            <TouchableOpacity style={styles.option} onPress={() => navigation.navigate('ProjectDefaults')}>
-                <Text style={styles.optionText}>Project Defaults</Text>
-                <Text style={styles.optionSubtext}>Set default yarn type, hook size, etc.</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity style={styles.option} onPress={() => Alert.alert(
                 'Data Management',
                 'Export projects as PDF/CSV\nImport patterns\nClear cache',

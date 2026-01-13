@@ -17,6 +17,8 @@ export default function ProjectEditScreen() {
     const [title, setTitle] = useState(existingProject?.title ?? '');
     const [craftType, setCraftType] = useState<Project['craftType']>(existingProject?.craftType ?? 'Crochet');
     const [notes, setNotes] = useState(existingProject?.notes ?? '');
+    const [counterInput, setCounterInput] = useState('');
+    const [counters, setCounters] = useState<string[]>(existingProject?.defaults?.counters || []);
 
     const handleSave = () => {
         if (!title.trim()) return;
@@ -43,6 +45,14 @@ export default function ProjectEditScreen() {
             ]);
         }
         navigation.goBack();
+    };
+
+    const addCounter = () => {
+        if (!counterInput.trim()) return;
+        if (counters.includes(counterInput)) return;
+
+        setCounters(prev => [...prev, counterInput]);
+        setCounterInput('');
     };
 
     return (
@@ -79,6 +89,27 @@ export default function ProjectEditScreen() {
                 onChangeText={setNotes}
                 style={[styles.input, styles.notes]}
                 multiline />
+
+            <Text>Set Initial Counters</Text>
+            {counters.map(name => (
+                <View key={name} style={styles.counterRow}>
+                    <Text>{name}</Text>
+                    <TouchableOpacity onPress={() => setCounters(prev => prev.filter(c => c!== name))}>
+                        <Text style={styles.removeText}>Remove</Text>
+                    </TouchableOpacity>
+                </View>
+            ))}
+            
+            <View style={styles.addRow}>
+                <TextInput
+                    placeholder="Counter name"
+                    value={counterInput}
+                    onChangeText={setCounterInput}
+                    style={styles.counterInput} />
+                <TouchableOpacity onPress={addCounter}>
+                    <Text style={styles.addText}>Add</Text>
+                </TouchableOpacity>
+            </View>
 
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                 <Text style={styles.saveText}>
@@ -143,4 +174,28 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
+    counterInput: {
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 10,
+        marginTop: 8,
+        flex: 1
+    },
+    counterRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 6
+    },
+    removeText: {
+        color: 'red'
+    },
+    addRow: {
+        flexDirection: 'row',
+        gap: 8,
+        marginTop: 8
+    },
+    addText: {
+        color: 'blue',
+        marginTop: 12
+    }
 });

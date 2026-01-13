@@ -77,10 +77,7 @@ export default function SessionDetailScreen() {
             <Text style={styles.title}>Session Summary</Text>
             
             <View style={styles.card}>
-                <Text>Rows: {session.counters.rows}</Text>
-                <Text>Increase: {session.counters.increase}</Text>
-                <Text>Decrease: {session.counters.decrease}</Text>
-                <Text>Time: {formatTime(session.counters.seconds)}</Text>
+                <Text>Time: {formatTime(session.seconds)}</Text>
             </View>
 
             <Text style={styles.sectionTitle}>Notes</Text>
