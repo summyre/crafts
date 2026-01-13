@@ -112,7 +112,7 @@ export default function StitchSessionScreen() {
             
             <View style={styles.timerRow}>
                 <Text style={styles.timerText}>
-                    Time: {Math.floor(seconds / 60)}m {seconds % 60}s
+                    Time: {formatTime(seconds)}
                 </Text>
 
                 <TouchableOpacity style={styles.timerButton} onPress={running ? pause: start}>

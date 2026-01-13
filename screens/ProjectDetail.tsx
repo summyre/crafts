@@ -15,7 +15,7 @@ const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    return hours > 0 ? `${hours}h ${minutes}m` : `${seconds}m`;
+    return hours > 0 ? `${hours}h ${minutes}m` : `${seconds}s`;
 };
 
 export default function ProjectDetailScreen() {
@@ -34,8 +34,14 @@ export default function ProjectDetailScreen() {
     };
 
     const { patterns } = usePatterns();
-    const linkedPatterns: Pattern[] = project.patternIds ? patterns.filter((p) => project.patternIds!.includes(p.id)) : [];
+    const linkedPatterns: Pattern[] = project?.patternIds ? patterns.filter((p) => {
+        const isLinked = project.patternIds!.includes(p.id);
+        console.log(`Pattern ${p.id} - ${p.title}: linked = ${isLinked}`);
+        return isLinked;
+    }) : [];
 
+    console.log('Linked patterns found: ', linkedPatterns.length);
+    
     const renderPhoto = ({item}: {item: ProjectPhoto}) => {
         const date = new Date(item.createdAt);
         
@@ -266,7 +272,7 @@ export default function ProjectDetailScreen() {
                         <Text style={styles.mutedText}>Timeline is empty. Start a session or add a photo</Text>
                     )}
                     
-                    <View style={styles.compactSection}>
+                    {/*<View style={styles.compactSection}>
                         <View style={styles.sectionHeaderRow}>
                             <Text style={styles.sectionHeader}>Linked Patterns</Text>
                             <TouchableOpacity style={styles.smallAddButton} onPress={handleLinkPattern}>
@@ -304,9 +310,12 @@ export default function ProjectDetailScreen() {
                                 ))}
                             </View>
                         ): (
-                            <Text style={styles.emptyText}>No patterns linked</Text>
+                            <View>
+                                <Text style={styles.emptyText}>No patterns linked</Text>
+                                <Text style={styles.mutedText}>Project has {project.patternIds?.length || 0} pattern Ids</Text>
+                            </View>
                         )}
-                    </View>
+                    </View>*/}
 
                     <Text style={styles.sectionHeader}>Sessions</Text>
 

@@ -26,6 +26,7 @@ import { CollectionProvider } from './store/CollectionContext';
 import { ThemeProvider } from './theme/ThemeContext';
 import { PatternsProvider } from './store/PatternsContext';
 import { CurrencyProvider } from './store/CurrenciesContext';
+import EditWishlistPatternScreen from './screens/EditWishlistPattern';
 
 enableScreens();
 
@@ -46,7 +47,8 @@ export type RootStackParamList = {
     CostCalculator: undefined;
     PatternPicker: {projectId: string};
     PatternAnnotate: {projectId: string; timelineItemId: string};
-    PatternWishlist: undefined;
+    PatternWishlist: {projectId: string};
+    PatternEdit: {projectId: string; patternId: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -113,6 +115,10 @@ export default function App() {
                       name = "PatternWishlist"
                       component={PatternWishlistScreen}
                       options={{ title: 'Pattern Wishlist' }}/>
+                    <Stack.Screen
+                      name = "PatternEdit"
+                      component={EditWishlistPatternScreen}
+                      options={{ title: 'Pattern Wishlist Edit' }}/>
                     <Stack.Screen
                       name = "Settings"
                       component={SettingsScreen}

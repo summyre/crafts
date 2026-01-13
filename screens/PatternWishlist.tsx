@@ -4,14 +4,61 @@ import { usePatterns } from "../store/PatternsContext";
 import { Pattern } from "../store/types";
 import { SketchCanvas } from '@terrylinla/react-native-sketch-canvas';
 import * as ImagePicker from 'expo-image-picker';
+import { useProjects } from "../store/ProjectsContext";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../App";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+
+type RouteProps = RouteProp<RootStackParamList, 'PatternWishlist'>;
+type NavProps = NativeStackNavigationProp<RootStackParamList>;
 
 export default function PatternWishlistScreen() {
-    const { patterns, setPatterns } = usePatterns();
+    const { projectId } = useRoute<RouteProps>().params;
+    const navigation = useNavigation<NavProps>();
+    const { projects, setProjects } = useProjects();
+    const project = projects.find(p => p.id === projectId);
     const [title, setTitle] = useState('');
     const [notes, setNotes] = useState('');
-    const [imageUri, setImageUri] = useState<string |undefined>();
+    const [imageUri, setImageUri] = useState<string | undefined>();
+
+    if (!project) {
+        return (
+            <View style={styles.container}>
+                <Text>Project not found</Text>
+            </View>
+        );
+    }
+
+    const wishlist: Pattern[] = project.patternWishlist || [];
+
+    const deletePattern = (patternId: string) => {
+        Alert.alert('Delete pattern?', 'This cannot be undone',
+            [
+                {text: 'Cancel', style: 'cancel'},
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => {
+                        setProjects(prev => prev.map(p =>
+                            p.id === projectId ? {
+                                ...p,
+                                patternWishlist: p.patternWishlist?.filter(
+                                    pat => pat.id !== patternId
+                                )
+                            } : p
+                        ));
+                    }
+                }
+            ]
+        )
+    };
 
     const addPattern = async () => {
+        if (!title.trim()) {
+            Alert.alert('Error', 'Please enter a title for the pattern');
+            return;
+        }
+
         const newPattern: Pattern = {
             id: Date.now().toString(),
             title,
@@ -19,7 +66,13 @@ export default function PatternWishlistScreen() {
             imageUri
         };
 
-        setPatterns(prev => [newPattern, ...prev]);
+        setProjects(prev => prev.map(p => 
+            p.id === projectId ? {
+                ...p, 
+                patternWishlist: [...(p.patternWishlist ?? []), newPattern]
+            } : p
+        ));
+
         setTitle('');
         setNotes('');
         setImageUri(undefined);
@@ -30,8 +83,32 @@ export default function PatternWishlistScreen() {
         if (result.canceled) return;
         setImageUri(result.assets[0].uri);
     };
+    
+    const renderWishlist = (item: Pattern) => {
+        return (
+            <View style={styles.card}>
+                <TouchableOpacity onPress={() => navigation.navigate('PatternEdit', {projectId, patternId: item.id})}>
+                    {item.imageUri ? (
+                        <Image source={{uri: item.imageUri}} style={styles.image}/>
+                    ) : (
+                        <View style={styles.placeholder}>
+                            <Text>No image</Text>
+                        </View>
+                    )}
+                    <Text style={styles.patternTitle}>{item.title}</Text>
+                    {item.notes ? (
+                        <Text style={styles.notes}>{item.notes}</Text>
+                    ): null}
+                </TouchableOpacity>
 
-    const renderPattern = ({item}: {item: Pattern}) => {
+                <TouchableOpacity onPress={() => deletePattern(item.id)}>
+                    <Text style={styles.deleteText}>Delete</Text>
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+    {/*const renderPattern = ({item}: {item: Pattern}) => {
         return (
             <TouchableOpacity style={styles.card}>
                 {item.imageUri ? <Image source={{uri: item.imageUri}} style={styles.image}/> : <View style={styles.placeholder}><Text>No image</Text></View>}
@@ -40,35 +117,42 @@ export default function PatternWishlistScreen() {
             </TouchableOpacity>
         )
         
-    };
+    };*/}
 
     return (
         <View style={styles.container}>
-            <TextInput
-                placeholder="Pattern Title"
-                value={title}
-                onChangeText={setTitle}
-                style={styles.input} />
+            <Text style={styles.title}>Pattern Wishlist</Text>
 
             <TextInput
-                placeholder="Notes"
+                style={styles.input}
+                placeholder="Pattern title"
+                value={title}
+                onChangeText={setTitle} />
+            
+            <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Notes (optional)"
                 value={notes}
                 onChangeText={setNotes}
-                style={[styles.input, {height: 60}]}
                 multiline />
-                    
-                    <TouchableOpacity onPress={pickImage} style={styles.pickButton}>
-                        <Text style={{color: 'white'}}>{imageUri ? 'Change Image' : 'Pick Image'}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={addPattern} style={styles.addButton}>
-                        <Text style={{color: 'white'}}>Add Pattern</Text>
-                    </TouchableOpacity>
-
-                    <FlatList
-                        data={patterns}
-                        renderItem={renderPattern}
-                        keyExtractor={item => item.id}
-                        contentContainerStyle={{paddingTop: 16}} />
+            
+            <TouchableOpacity style={styles.pickButton} onPress={pickImage}>
+                <Text style={{color: '#fff'}}>{imageUri ? 'Change Image' : 'Pick Image'}</Text>
+            </TouchableOpacity>
+            
+            {imageUri && <Image source={{uri: imageUri}} style={styles.image} />}
+            <TouchableOpacity style={styles.saveButton} onPress={addPattern}>
+                <Text style={{color: '#fff', fontWeight: 'bold'}}>Add Pattern</Text>
+            </TouchableOpacity>
+            
+            {wishlist.length === 0 ? (
+                <Text style={styles.mutedText}>No patterns in wishlist yet</Text>
+            ) : (
+                <FlatList
+                    data={wishlist}
+                    keyExtractor={item => item.id}
+                    renderItem={({item}) => renderWishlist(item)}/>
+            )}
         </View>
     )
 };
@@ -79,19 +163,23 @@ const styles = StyleSheet.create({
         padding: 16
     },
     card: {
-        marginBottom: 16,
+        marginBottom: 10,
         borderWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 8,
-        padding: 8
+        borderRadius: 10,
+        padding: 12
     },
     title: {
         fontWeight: 'bold',
         marginTop: 8
     },
+    patternTitle: {
+        fontSize: 16,
+        fontWeight: '600'
+    },
     notes: {
         color: '#555',
-        marginTop: 4
+        marginTop: 6
     },
     image: {
         width: '100%',
@@ -133,5 +221,17 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: 8,
         alignItems: 'center'
+    },
+    deleteText: {
+        color: 'red',
+        marginTop: 8,
+        fontWeight: 'bold'
+    },
+    mutedText: {
+        fontStyle: 'italic',
+        color: '#777'
+    },
+    textArea: {
+        height: 80
     }
 })

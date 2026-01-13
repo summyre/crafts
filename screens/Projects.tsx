@@ -17,31 +17,31 @@ export default function ProjectScreen() {
         const coverUri = coverPhoto?.uri;
 
         return (
-        <TouchableOpacity 
-        style={styles.folder} 
-        onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })
-        }>
-            {coverUri ? (
-                <Image source={{uri: coverUri}} style={styles.thumbnail}/>
-            ) : (
-                <View style={styles.placeholder}>
-                    <Text style={styles.placeholderText}>No image</Text>
-                </View>
-            )}
-            
-            <Text style={styles.folderTitle}>{item.title}</Text>
-            {/*<Text style={styles.status}>{item.status}</Text>*/}
-        </TouchableOpacity>
-
-        )
+            <View style={styles.projectCard}>
+                <TouchableOpacity 
+                style={styles.folder} 
+                onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })
+                }>
+                    {coverUri ? (
+                        <Image source={{uri: coverUri}} style={styles.thumbnail}/>
+                    ) : (
+                        <View style={styles.placeholder}>
+                            <Text style={styles.placeholderText}>No image</Text>
+                        </View>
+                    )}
+                    
+                    <Text style={styles.folderTitle}>{item.title}</Text>
+                    {/*<Text style={styles.status}>{item.status}</Text>*/}
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.wishlistButton} onPress={() => navigation.navigate('PatternWishlist', {projectId: item.id})}>
+                    <Text style={styles.wishlistButtonText}>Pattern Wishlist</Text>
+                </TouchableOpacity>
+        </View>
+        );
     };
 
     return (
         <View style={{ flex: 1 }}>
-            <TouchableOpacity style={styles.wishlistButton} onPress={() => navigation.navigate('PatternWishlist')}>
-                <Text style={styles.wishlistButtonText}>Pattern Wishlist</Text>
-            </TouchableOpacity>
-            
             <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('ProjectEdit', undefined)}>
                 <Text style={styles.createText}>+ New Project</Text>
             </TouchableOpacity>
@@ -62,6 +62,13 @@ export default function ProjectScreen() {
 const styles = StyleSheet.create({
     container: {
         padding: 16,
+    },
+    projectCard: {
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 12,
+        padding: 12
     },
     folder: {
         flex: 1,

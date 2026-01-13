@@ -8,7 +8,6 @@ export type Session = {
     title?: string;
     counters: SessionCounters;
     notes?: string;
-    //photoUri?: string;
     photos?: ProjectPhoto[];
     isMilestone?: boolean;
     seconds: number;
@@ -32,6 +31,7 @@ export type Project = {
     coverPhotoId?: string;
     timeline: TimelineItem[];
     patternIds?: string[];
+    patternWishlist?: Pattern[];
 };
 
 export type CostResult = {
