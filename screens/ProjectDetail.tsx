@@ -10,6 +10,7 @@ import { Session, ProjectPhoto, TimelineItem, Pattern } from "../store/types";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
+type ProjectTab = 'timeline' | 'sessions' | 'photos';
 
 const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -21,6 +22,7 @@ const formatTime = (totalSeconds: number) => {
 export default function ProjectDetailScreen() {
     const { projectId } = useRoute<RouteProps>().params;
     const navigation = useNavigation<NavProps>();
+    const [activeTab, setActiveTab] = useState<ProjectTab>('timeline');
 
     const { projects, setProjects } = useProjects();
     const project = projects.find((p) => p.id === projectId);
@@ -40,7 +42,7 @@ export default function ProjectDetailScreen() {
         return isLinked;
     }) : [];
 
-    console.log('Linked patterns found: ', linkedPatterns.length);
+    //console.log('Linked patterns found: ', linkedPatterns.length);
     
     const renderPhoto = ({item}: {item: ProjectPhoto}) => {
         const date = new Date(item.createdAt);
@@ -221,10 +223,6 @@ export default function ProjectDetailScreen() {
                 onPress={() =>
                     navigation.navigate('SessionDetail', {projectId, sessionId: item.id})
                 }>
-                    <View style={styles.sessionBadge}>
-                        <Text style={styles.sessionBadgeText}>SESSION</Text>
-                    </View>
-
                     <View style={styles.timelineContent}>
                         <Text style={styles.photoTitle}>{date.toLocaleDateString()}</Text>
                     </View>
@@ -257,19 +255,34 @@ export default function ProjectDetailScreen() {
                     <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('StitchSession', {projectId})}>
                         <Text style={styles.startButtonText}>Start Session</Text>
                     </TouchableOpacity>
-                    
-                    <Text style={styles.sectionTitle}>Timeline</Text>
 
-                    {sortedTimeline.length > 0 ? (
-                        <View style={styles.listContainer}>
-                            {sortedTimeline.map((item) => (
-                                <View key={item.id}>
-                                    {renderTimelineItem({item})}
-                                </View>
-                            ))}
-                        </View>
-                    ) : (
-                        <Text style={styles.mutedText}>Timeline is empty. Start a session or add a photo</Text>
+                    <View style={styles.tabBar}>
+                        {(['timeline', 'sessions', 'photos'] as ProjectTab[]).map(tab => (
+                            <TouchableOpacity
+                                key={tab}
+                                style={[styles.tabButton, activeTab === tab && styles.tabButtonActive]}
+                                onPress={() => setActiveTab(tab)}>
+                                    <Text style={[styles.startButtonText, activeTab === tab && styles.tabTextActive]}>
+                                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                    </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    {activeTab === 'timeline' && (
+                        <>
+                        {sortedTimeline.length > 0 ? (
+                            <View style={styles.listContainer}>
+                                {sortedTimeline.map((item) => (
+                                    <View key={item.id}>
+                                        {renderTimelineItem({item})}
+                                    </View>
+                                ))}
+                            </View>
+                        ) : (
+                            <Text style={styles.mutedText}>Timeline is empty. Start a session or add a photo</Text>
+                        )}
+                        </>
                     )}
                     
                     {/*<View style={styles.compactSection}>
@@ -317,37 +330,42 @@ export default function ProjectDetailScreen() {
                         )}
                     </View>*/}
 
-                    <Text style={styles.sectionHeader}>Sessions</Text>
-
-                    {sortedSessions.length > 0 ? (
-                        <View style={styles.listContainer}>
-                            {sortedSessions.map((item) => (
-                                <View key={item.id}>
-                                    {renderSession({item})}
-                                </View>
-                            ))}
-                        </View>
-                    ) : (
-                        <Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>
+                    {activeTab === 'sessions' && (
+                        <>
+                        {sortedSessions.length > 0 ? (
+                            <View style={styles.listContainer}>
+                                {sortedSessions.map((item) => (
+                                    <View key={item.id}>
+                                        {renderSession({item})}
+                                    </View>
+                                ))}
+                            </View>
+                        ) : (
+                            <Text style={styles.emptyText}>No sessions yet. Start one to track progress.</Text>
+                        )}
+                        </>
                     )}
 
-                    <Text style={styles.sectionHeader}>Photos</Text>
-                    <TouchableOpacity
-                        style={styles.addButton}
-                        onPress={() => handleAddPhoto()}>
-                            <Text style={styles.addButtonText}>+ Add Photo</Text>
-                    </TouchableOpacity>
+                    {activeTab === 'photos' && (
+                        <>
+                        <TouchableOpacity
+                            style={styles.addButton}
+                            onPress={() => handleAddPhoto()}>
+                                <Text style={styles.addButtonText}>+ Add Photo</Text>
+                        </TouchableOpacity>
 
-                    {sortedPhotos.length > 0 ? (
-                        <View style={styles.listContainer}>
-                            {sortedPhotos.map((item) => (
-                                <View key={item.id}>
-                                    {renderPhoto({item})}
-                                </View>
-                            ))}
-                        </View>
-                    ) : (
-                        <Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>
+                        {sortedPhotos.length > 0 ? (
+                            <View style={styles.listContainer}>
+                                {sortedPhotos.map((item) => (
+                                    <View key={item.id}>
+                                        {renderPhoto({item})}
+                                    </View>
+                                ))}
+                            </View>
+                        ) : (
+                            <Text style={styles.emptyText}>No photos yet. Add one to track progress.</Text>
+                        )}
+                        </>
                     )}
                     <View style={styles.bottomSpacer}/>
                 </View>
@@ -616,5 +634,29 @@ const styles = StyleSheet.create({
     },
     bottomSpacer: {
         height: 60
+    },
+    tabBar: {
+        flexDirection: 'row',
+        borderWidth: 1,
+        borderColor: '#cc',
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 24
+    },
+    tabButton: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        backgroundColor: '#f2f2f2'
+    },
+    tabButtonActive: {
+        backgroundColor: '#4f46e5'
+    },
+    tabText: {
+        fontWeight: '600',
+        color: '#333'
+    },
+    tabTextActive: {
+        color: 'white'
     }
 });
