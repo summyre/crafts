@@ -74,7 +74,8 @@ const useScreenStyles = () => {
         header: {
             fontSize: 18,
             fontWeight: 'bold',
-            marginBottom: 12
+            marginBottom: 12,
+            color: theme.colors.textDark
         },
         button: {
             padding: 14,
@@ -87,7 +88,7 @@ const useScreenStyles = () => {
             backgroundColor: theme.colors.delete
         },
         text: {
-            color: 'white',
+            color: theme.colors.textDark,
             fontWeight: '600'
         },
         divider: {

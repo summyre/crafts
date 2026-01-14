@@ -74,7 +74,9 @@ const useScreenStyles = () => {
             marginBottom: 30,
             borderBottomWidth: 1,
             paddingBottom: spacing.md,
-            textAlign: 'center'
+            textAlign: 'center',
+            color: theme.colors.textDark,
+            borderColor: theme.colors.textDark
         },
         grid: {
             flexDirection: 'row',
@@ -93,7 +95,8 @@ const useScreenStyles = () => {
         },
         buttonText: {
             fontSize: fontSizes.lg,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            color: theme.colors.textDark
         },
     });
 }

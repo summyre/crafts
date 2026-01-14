@@ -187,25 +187,25 @@ export default function SettingsScreen() {
     return (
         <ScrollView style={[styles.container, {backgroundColor: theme.colors.background}]}>
             <View style={[styles.section, {backgroundColor: theme.colors.card}]}>
-                <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Notifications</Text>
+                <Text style={[styles.sectionTitle, {color: theme.colors.textDark}]}>Notifications</Text>
                 <View style={styles.option}>
                     <View style={styles.rowBetween}>
-                        <Text style={[styles.optionText, {color: theme.colors.text}]}>Enable Notification</Text>
+                        <Text style={[styles.optionText, {color: theme.colors.textDark}]}>Enable Notification</Text>
                         <Switch 
                             value={notificationsEnabled} 
                             onValueChange={toggleNotification}
                             trackColor={{false: '#767577', true: theme.colors.primary}}
                             thumbColor={notificationsEnabled ? theme.colors.primary: '#f4f3f4'}/>
                     </View>
-                    <Text style={[styles.optionSubtext, {color: theme.colors.text}]}>Get reminders for project deadlines</Text>
+                    <Text style={[styles.optionSubtext, {color: '#696565'}]}>Get reminders for project deadlines</Text>
                 </View>
             </View>
 
             <View style={[styles.section, {backgroundColor: theme.colors.card}]}>
-                <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Appearance</Text>
+                <Text style={[styles.sectionTitle, {color: theme.colors.textDark}]}>Appearance</Text>
 
                 <View style={styles.option}>
-                    <Text style={[styles.optionText, {color: theme.colors.text}]}>Theme</Text>
+                    <Text style={[styles.optionText, {color: theme.colors.textDark}]}>Theme</Text>
                     <View style={styles.themeContainer}>
                         {themes.map((t) => (
                             <TouchableOpacity
@@ -220,10 +220,10 @@ export default function SettingsScreen() {
             </View>
 
             <View style={[styles.section, {backgroundColor: theme.colors.card}]}>
-                <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>Currency</Text>
+                <Text style={[styles.sectionTitle, {color: theme.colors.textDark}]}>Currency</Text>
                 <View style={styles.option}>
-                    <Text style={[styles.optionText, {color: theme.colors.text}]}>Cost Calculator Currency</Text>
-                    <Picker selectedValue={currencyCode} onValueChange={handleCurrencyChange} style={{backgroundColor: theme.colors.card, color: theme.colors.text}}>
+                    <Text style={[styles.optionText, {color: theme.colors.textDark}]}>Cost Calculator Currency</Text>
+                    <Picker selectedValue={currencyCode} onValueChange={handleCurrencyChange} style={{backgroundColor: theme.colors.background, color: theme.colors.textDark}}>
                         <Picker.Item label="Auto-detect (device locale)" value="auto" />
                         <Picker.Item label="Set manually" value="manual" />
                         {/*{CURRENCIES.map((curr) => (
@@ -307,11 +307,11 @@ export default function SettingsScreen() {
                 onRequestClose={() => setShowCurrencyModal(false)}>
                     <View style={styles.modalContainer}>
                         <View style={[styles.modalContent, {backgroundColor: theme.colors.card}]}>
-                            <Text style={[styles.modalTitle, {color: theme.colors.text}]}>Select Currency</Text>
+                            <Text style={[styles.modalTitle, {color: theme.colors.textDark}]}>Select Currency</Text>
                             <ScrollView>
                                 {CURRENCIES.map((curr) => (
                                     <TouchableOpacity key={curr.code} style={styles.currencyItem} onPress={() => handleManualCurrecySelect(curr.code)}>
-                                        <Text style={[styles.currencyText, {color: theme.colors.text}]}>{curr.code} - {curr.name} ({curr.symbol})</Text>
+                                        <Text style={[styles.currencyText, {color: theme.colors.textDark}]}>{curr.code} - {curr.name} ({curr.symbol})</Text>
                                     </TouchableOpacity>
                                 ))}
                             </ScrollView>
@@ -327,8 +327,8 @@ export default function SettingsScreen() {
                 animationType="slide"
                 onRequestClose={() => setShowTutorialModal(false)}>
                     <View style={[styles.tutorialModal, {backgroundColor: theme.colors.background}]}>
-                        <Text style={[styles.tutorialTitle, {color: theme.colors.text}]}>App Tutorial</Text>
-                        <Text style={[styles.tutorialText, {color: theme.colors.text}]}>
+                        <Text style={[styles.tutorialTitle, {color: theme.colors.textDark}]}>App Tutorial</Text>
+                        <Text style={[styles.tutorialText, {color: theme.colors.textDark}]}>
                             This tutorial will guide you through:
                             {"\n\n"}1. Creating your first project
                             {"\n\n"}2. Adding patterns and materials
@@ -365,19 +365,19 @@ const useScreenStyles = () => {
             fontSize: 18,
             fontWeight: 'bold',
             marginBottom: 12,
-            color: theme.colors.text
+            color: theme.colors.textDark
         },
         option: {
             marginBottom: 16
         },
         optionText: {
             fontSize: 16,
-            color: theme.colors.text,
+            color: theme.colors.textDark,
             marginBottom: 4
         },
         optionSubtext: {
             fontSize: 14,
-            color: '#666',
+            color: '#696565',
             marginTop: 2
         },
         rowBetween: {
@@ -413,7 +413,7 @@ const useScreenStyles = () => {
             fontWeight: 'bold'
         },
         manualCurrencyButton: {
-            backgroundColor: '#e3f2fd',
+            backgroundColor: theme.colors.background,
             padding: 12,
             borderRadius: 8,
             marginTop: 8,
@@ -431,7 +431,7 @@ const useScreenStyles = () => {
             alignItems: 'center'
         },
         tutorialButtonText: {
-            color: 'white',
+            color: theme.colors.textDark,
             fontWeight: 'bold'
         },
         supportOption: {
@@ -441,7 +441,7 @@ const useScreenStyles = () => {
         },
         supportOptionText: {
             fontSize: 16,
-            color: '#1976d2',
+            color: theme.colors.link,
             marginRight: 'auto',
             padding: spacing.xs,
             paddingHorizontal: spacing.md
@@ -543,7 +543,7 @@ const useScreenStyles = () => {
         },*/
         currentSelection: {
             padding: 12,
-            color: theme.colors.text,
+            color: theme.colors.textDark,
             textAlign: 'center'
         },
         bottomSpacer: {
