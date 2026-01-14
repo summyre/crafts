@@ -5,11 +5,14 @@ import { RootStackParamList } from "../App";
 import { useProjects } from "../store/ProjectsContext";
 import { Project } from "../store/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes } from "../theme/constants";
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectEdit'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
 
 export default function ProjectEditScreen() {
+    const styles = useScreenStyles();
     const { projectId } = useRoute<RouteProps>().params ?? {};
     const navigation = useNavigation<NavProps>();
     const { projects, setProjects } = useProjects();
@@ -121,81 +124,89 @@ export default function ProjectEditScreen() {
 
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 24,
-        textAlign: 'center',
-        color: '#333'
-    },
-    input: {
-        borderWidth: 1,
-        borderRadius: 10,
-        padding: 12,
-        marginBottom: 16,
-    },
-    notes: {
-        height: 100,
-        textAlignVertical: 'top',
-    },
-    toggle: {
-        flex: 1,
-        padding: 12,
-        borderWidth: 1,
-        borderRadius: 10,
-        alignContent: 'center',
-        marginHorizontal: 4,
-    },
-    toggleRow: {
-        flexDirection: 'row',
-        marginBottom: 16,
-    },
-    toggleActive: {
-        backgroundColor: '#777',
-    },
-    toggleText: {
-        fontWeight: 'bold',
-    },
-    toggleTextActive: {
-        color: '#fff',
-    },
-    saveButton: {
-        padding: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-        backgroundColor: '#777',
-    },
-    saveText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    counterInput: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 10,
-        marginTop: 8,
-        flex: 1
-    },
-    counterRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 6
-    },
-    removeText: {
-        color: 'red'
-    },
-    addRow: {
-        flexDirection: 'row',
-        gap: 8,
-        marginTop: 8
-    },
-    addText: {
-        color: 'blue',
-        marginTop: 12
-    }
-});
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: spacing.lg,
+            backgroundColor: theme.colors.background
+        },
+        title: {
+            fontSize: fontSizes.xxxl,
+            fontWeight: 'bold',
+            marginBottom: spacing.xxl,
+            textAlign: 'center',
+            color: theme.colors.text
+        },
+        input: {
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            marginBottom: spacing.lg,
+            backgroundColor: theme.colors.card
+        },
+        notes: {
+            height: 100,
+            textAlignVertical: 'top',
+        },
+        toggle: {
+            flex: 1,
+            padding: spacing.md,
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            alignContent: 'center',
+            marginHorizontal: 1,
+        },
+        toggleRow: {
+            flexDirection: 'row',
+            marginBottom: spacing.lg,
+        },
+        toggleActive: {
+            backgroundColor: theme.colors.secondary,
+        },
+        toggleText: {
+            fontWeight: 'bold',
+        },
+        toggleTextActive: {
+            color: '#fff',
+        },
+        saveButton: {
+            padding: spacing.lg,
+            borderRadius: borderRadius.lg,
+            alignItems: 'center',
+            backgroundColor: theme.colors.primary,
+        },
+        saveText: {
+            color: '#fff',
+            fontWeight: 'bold',
+        },
+        counterInput: {
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            marginTop: spacing.sm,
+            marginBottom: spacing.lg,
+            flex: 1,
+            backgroundColor: theme.colors.card
+        },
+        counterRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingVertical: spacing.sm
+        },
+        removeText: {
+            color: theme.colors.delete
+        },
+        addRow: {
+            flexDirection: 'row',
+            gap: spacing.sm,
+            marginTop: spacing.sm
+        },
+        addText: {
+            color: 'blue',
+            marginTop: spacing.xl
+        }
+    });
+}

@@ -3,8 +3,11 @@ import { Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert,
 import { useCollection } from "../store/CollectionContext";
 import { CollectionItem } from "../store/collectionStore";
 import * as ImagePicker from 'expo-image-picker';
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes, shadows } from "../theme/constants";
 
 export default function AddItemScreen({navigation}: any) {
+    const styles = useScreenStyles();
     const { addItem } = useCollection();
     const [form, setForm] = useState<Omit<CollectionItem, 'id'>>({
         name: '',
@@ -216,155 +219,160 @@ export default function AddItemScreen({navigation}: any) {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#444',
-    },
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 24,
-        color: '#333',
-    },
-    form: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 20,
-        marginBottom: 20,
-    },
-    imageSection: {
-        marginBottom: 20,
-    },
-    imagePreviewContainer: {
-        alignItems: 'center',
-    },
-    imagePreview: {
-        width: 150,
-        height: 150,
-        borderRadius: 8,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#444',
-    },
-    imageButtonRow: {
-        flexDirection: 'row',
-        gap: 10,
-        marginTop: 5,
-    },
-    imageButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 6,
-    },
-    removeButton: {
-        backgroundColor: '#333'
-    },
-    changeButton: {
-        backgroundColor: '#333'
-    },
-    imageButtonText: {
-        color: 'white',
-        fontWeight: '600',
-        fontSize: 14,
-    },
-    imagePlaceholder: {
-        width: '100%',
-        height: 150,
-        borderRadius: 8,
-        backgroundColor: '#f0f0f0',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#ddd',
-        borderStyle: 'dashed',
-    },
-    imagePlaceholderText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 4,
-    },
-    imagePlaceholderIcon: {
-        fontSize: 16,
-        marginBottom: 4,
-    },
-    imagePlaceholderSubtext: {
-        fontSize: 12,
-        color: '#333',
-        textAlign: 'center',
-        paddingHorizontal: 20,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginBottom: 6,
-        color: '#444',
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 16,
-        fontSize: 16,
-    },
-    typeButtons: {
-        flexDirection: 'row',
-        marginBottom: 16,
-    },
-    typeButton: {
-        flex: 1,
-        padding: 12,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        alignItems: 'center',
-        marginRight: 8,
-    },
-    typeButtonActive: {
-        backgroundColor: '#4a6fa5',
-        borderColor: '#4a6fa5',
-    },
-    typeButtonText: {
-        color: '#666',
-    },
-    typeButtonActiveText: {
-        color: 'white',
-        fontWeight: '600',
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 24,
-        gap: 12,
-    },
-    addButton: {
-        backgroundColor: '#444',
-        padding: 16,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 20,
-    },
-    addButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    cancelButton: {
-        flex: 1,
-        backgroundColor: '#444',
-        padding: 16,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 20,
-        borderWidth: 1,
-        borderColor: '#ddd',
-    },
-    cancelButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-});
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: spacing.lg,
+            backgroundColor: theme.colors.background,
+        },
+        header: {
+            fontSize: fontSizes.xxxl,
+            fontWeight: 'bold',
+            marginBottom: spacing.xxl,
+            color: theme.colors.text,
+        },
+        form: {
+            backgroundColor: theme.colors.card,
+            borderRadius: borderRadius.lg,
+            padding: spacing.xl,
+            marginBottom: spacing.xl,
+        },
+        imageSection: {
+            marginBottom: spacing.xl,
+        },
+        imagePreviewContainer: {
+            alignItems: 'center',
+        },
+        imagePreview: {
+            width: 150,
+            height: 150,
+            borderRadius: borderRadius.md,
+            marginBottom: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
+        imageButtonRow: {
+            flexDirection: 'row',
+            gap: 10,
+            marginTop: 5,
+        },
+        imageButton: {
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.sm,
+            borderRadius: borderRadius.sm,
+        },
+        removeButton: {
+            backgroundColor: theme.colors.primary
+        },
+        changeButton: {
+            backgroundColor: theme.colors.primary
+        },
+        imageButtonText: {
+            color: '#fff',
+            fontWeight: '600',
+            fontSize: fontSizes.md,
+        },
+        imagePlaceholder: {
+            width: '100%',
+            height: 150,
+            borderRadius: borderRadius.md,
+            backgroundColor: theme.colors.background,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: theme.colors.border,
+            borderStyle: 'dashed',
+        },
+        imagePlaceholderText: {
+            fontSize: fontSizes.lg,
+            fontWeight: '600',
+            color: theme.colors.text,
+            marginBottom: spacing.xs,
+        },
+        imagePlaceholderIcon: {
+            fontSize: fontSizes.lg,
+            marginBottom: spacing.xs,
+        },
+        imagePlaceholderSubtext: {
+            fontSize: fontSizes.sm,
+            color: theme.colors.text,
+            textAlign: 'center',
+            paddingHorizontal: spacing.xl,
+        },
+        label: {
+            fontSize: fontSizes.md,
+            fontWeight: '600',
+            marginBottom: spacing.xs,
+            color: theme.colors.text,
+        },
+        input: {
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            marginBottom: spacing.lg,
+            fontSize: fontSizes.lg,
+        },
+        typeButtons: {
+            flexDirection: 'row',
+            marginBottom: spacing.lg,
+        },
+        typeButton: {
+            flex: 1,
+            padding: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            borderRadius: borderRadius.md,
+            alignItems: 'center',
+            marginRight: spacing.sm,
+        },
+        typeButtonActive: {
+            backgroundColor: theme.colors.primary,
+            borderColor: theme.colors.border,
+        },
+        typeButtonText: {
+            color: theme.colors.text,
+        },
+        typeButtonActiveText: {
+            color: '#fff',
+            fontWeight: '600',
+        },
+        buttonRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: spacing.xxl,
+            gap: spacing.md,
+            marginBottom: spacing.xxxl
+        },
+        addButton: {
+            backgroundColor: theme.colors.primary,
+            padding: spacing.lg,
+            borderRadius: borderRadius.md,
+            alignItems: 'center',
+            marginTop: spacing.xl,
+        },
+        addButtonText: {
+            color: '#fff',
+            fontSize: fontSizes.lg,
+            fontWeight: 'bold',
+        },
+        cancelButton: {
+            flex: 1,
+            backgroundColor: theme.colors.primary,
+            padding: spacing.lg,
+            borderRadius: borderRadius.md,
+            alignItems: 'center',
+            marginTop: spacing.xl,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
+        cancelButtonText: {
+            color: '#fff',
+            fontSize: fontSizes.lg,
+            fontWeight: 'bold',
+        },
+    });
+}

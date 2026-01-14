@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, TextInput } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
@@ -8,6 +7,8 @@ import { useProjects } from "../store/ProjectsContext";
 import { Session, TimelineItem } from "../store/types";
 import { useCounter } from "../hooks/useCounter";
 import { useTimer } from "../hooks/useTimer";
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes } from "../theme/constants";
 
 type RouteProps = RouteProp<RootStackParamList, 'StitchSession'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -22,6 +23,7 @@ const formatTime = (totalSeconds: number) => {
 };
 
 export default function StitchSessionScreen() {
+    const styles = useScreenStyles();
     const { projectId } = useRoute<RouteProps>().params;
     const navigation = useNavigation<NavProps>();
     const { projects, setProjects } = useProjects();
@@ -119,48 +121,50 @@ export default function StitchSessionScreen() {
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.sectionTitle}>Counters</Text>
-            {Object.entries(counters.values).map(([name, value]) => (
-                <View key={name} style={styles.counterRow}>
-                    <Text style={styles.counterName}>{name}: {value}</Text>
-                    <View style={styles.counterButtons}>
-                        <TouchableOpacity style={styles.counterButton} onPress={() => increment(name)}>
-                            <Text>+</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.counterButton} onPress={() => decrement(name)}>
-                            <Text>-</Text>
-                        </TouchableOpacity>
+            <ScrollView>
+                <Text style={styles.sectionTitle}>Counters</Text>
+                {Object.entries(counters.values).map(([name, value]) => (
+                    <View key={name} style={styles.counterRow}>
+                        <View style={styles.counterButtons}>
+                            <TouchableOpacity style={styles.counterButton} onPress={() => increment(name)}>
+                                <Text style={styles.counterButtonText}>+</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.counterName}>{name}: {value}</Text>
+                            <TouchableOpacity style={styles.counterButton} onPress={() => decrement(name)}>
+                                <Text style={styles.counterButtonText}>-</Text>
+                            </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.removeButton} onPress={() => Alert.alert(
-                            'Remove Counter',
-                            `Remove "${name}"?`,
-                            [
-                                {text: 'Cancel', style: 'cancel'},
-                                {text: 'Remove', style: 'destructive', onPress: () => removeCounter(name)}
-                            ]
-                        )}>
-                            <Text style={{color: 'red'}}>X</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity style={styles.removeButton} onPress={() => Alert.alert(
+                                'Remove Counter',
+                                `Remove "${name}"?`,
+                                [
+                                    {text: 'Cancel', style: 'cancel'},
+                                    {text: 'Remove', style: 'destructive', onPress: () => removeCounter(name)}
+                                ]
+                            )}>
+                                <Text style={styles.delete}>X</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            ))}
+                ))}
 
-            <View style={styles.addCounterRow}>
-                <TextInput
-                    placeholder='New counter name'
-                    value={newCounterName}
-                    onChangeText={setNewCounterName}
-                    style={styles.input} />
-                
-                <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={() => {
-                        addCounter(newCounterName);
-                        setNewCounterName('');
-                    }}>
-                        <Text style={styles.addButtonText}>Add</Text>
-                </TouchableOpacity>
-            </View>
+                <View style={styles.addCounterRow}>
+                    <TextInput
+                        placeholder='New counter name'
+                        value={newCounterName}
+                        onChangeText={setNewCounterName}
+                        style={styles.input} />
+                    
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => {
+                            addCounter(newCounterName);
+                            setNewCounterName('');
+                        }}>
+                            <Text style={styles.addButtonText}>Add</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
             
             <TouchableOpacity style={styles.saveButton} onPress={handleSaveSession}>
                 <Text style={styles.saveButtonText}>Save session</Text>
@@ -169,143 +173,162 @@ export default function StitchSessionScreen() {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#fff',
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 16
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    headerText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    timerRow: {
-        textAlign: 'center',
-        fontSize: 16,
-        marginVertical: 8,
-    },
-    timerButton: {
-        padding: 12
-    },
-    timerText: {
-        fontSize: 12
-    },
-    card: {
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: 12,
-        marginVertical: 8,
-    },
-    cardHalf: {
-        flex: 1,
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: 12,
-        marginHorizontal: 4,
-    },
-    sectionTitle: {
-        textAlign: 'center',
-        marginBottom: 8,
-        fontWeight: 'bold',
-        marginTop: 16
-    },
-    counterRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 12,
-        marginBottom: 8
-    },
-    counterButtons: {
-        flexDirection: 'row',
-        gap: 8
-    },
-    counterButton: {
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 6,
-    },
-    counterButtonText: {
-        fontSize: 18,
-    },
-    counterName: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 8
-    },
-    counterValue: {
-        fontSize: 18,
-        marginHorizontal: 16,
-    },
-    reminderButton: {
-        alignSelf: 'center',
-        paddingVertical: 6,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 'auto',
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 'auto',
-    },
-    footerButton: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 6,
-    },
-    footerText: {
-        fontSize: 12,
-    },
-    scrollContent: {
-        padding: 16,
-    },
-    removeButton: {
-        padding: 8,
-        marginLeft: 8
-    },
-    addCounterRow: {
-     flexDirection: 'row',
-     marginTop: 12,
-     gap: 8   
-    },
-    input: {
-        flex: 1,
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 10
-    },
-    addButton: {
-        paddingHorizontal: 16,
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderRadius: 8
-    },
-    addButtonText: {
-        fontWeight: 'bold'
-    },
-    saveButton: {
-        marginTop: 24,
-        padding: 16,
-        borderRadius: 10,
-        backgroundColor: '#333',
-        alignItems: 'center'
-    },
-    saveButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16
-    }
-})
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: spacing.lg,
+            backgroundColor: theme.colors.background
+        },
+        title: {
+            fontSize: fontSizes.xxl,
+            fontWeight: 'bold',
+            marginBottom: spacing.lg,
+            color: theme.colors.text
+        },
+        header: {
+            alignItems: 'center',
+            marginBottom: spacing.sm,
+        },
+        headerText: {
+            fontSize: fontSizes.xl,
+            fontWeight: 'bold',
+        },
+        timerRow: {
+            textAlign: 'center',
+            fontSize: fontSizes.lg,
+            marginVertical: spacing.sm,
+        },
+        timerButton: {
+            padding: spacing.md,
+            fontSize: fontSizes.lg
+        },
+        timerText: {
+            fontSize: fontSizes.md
+        },
+        card: {
+            borderWidth: 1,
+            borderRadius: borderRadius.lg,
+            padding: spacing.md,
+            marginVertical: spacing.sm,
+        },
+        cardHalf: {
+            flex: 1,
+            borderWidth: 1,
+            borderRadius: borderRadius.lg,
+            padding: spacing.md,
+            marginHorizontal: spacing.xs,
+        },
+        sectionTitle: {
+            textAlign: 'center',
+            marginBottom: spacing.md,
+            fontWeight: 'bold',
+            marginTop: spacing.lg,
+            fontSize: fontSizes.xxl
+        },
+        counterRow: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: spacing.md,
+            marginBottom: spacing.xs
+        },
+        counterButtons: {
+            flexDirection: 'row',
+            gap: spacing.md
+        },
+        counterButton: {
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.sm,
+            backgroundColor: theme.colors.primary
+        },
+        counterButtonText: {
+            fontSize: fontSizes.xl,
+            color: '#fff'
+        },
+        counterName: {
+            fontSize: fontSizes.lg,
+            fontWeight: '600',
+            marginHorizontal: spacing.md,
+            marginRight: spacing.lg,
+            marginTop: spacing.sm
+            //color: theme.colors.secondary
+        },
+        counterValue: {
+            fontSize: fontSizes.xl,
+            marginHorizontal: spacing.lg,
+        },
+        /*reminderButton: {
+            alignSelf: 'center',
+            paddingVertical: 6,
+        },
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: 'auto',
+        },
+        footer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: 'auto',
+        },
+        footerButton: {
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 6,
+        },
+        footerText: {
+            fontSize: 12,
+        },
+        scrollContent: {
+            padding: 16,
+        },*/
+        removeButton: {
+            padding: spacing.sm,
+            marginLeft: spacing.sm
+        },
+        addCounterRow: {
+            flexDirection: 'row',
+            marginTop: spacing.md,
+            gap: spacing.xs
+        },
+        input: {
+            flex: 1,
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            padding: spacing.sm
+        },
+        addButton: {
+            paddingHorizontal: spacing.lg,
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            backgroundColor: theme.colors.primary
+        },
+        addButtonText: {
+            fontWeight: 'bold'
+        },
+        saveButton: {
+            marginTop: spacing.xxl,
+            padding: spacing.lg,
+            borderRadius: borderRadius.md,
+            backgroundColor: theme.colors.secondary,
+            alignItems: 'center',
+            marginBottom: spacing.xxl
+        },
+        saveButtonText: {
+            color: '#fff',
+            fontWeight: 'bold',
+            fontSize: fontSizes.lg
+        },
+        delete: {
+            color: theme.colors.delete,
+            fontWeight: 'bold',
+            fontSize: fontSizes.lg
+        }
+    });
+}

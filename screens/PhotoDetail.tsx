@@ -4,6 +4,8 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { useProjects } from "../store/ProjectsContext";
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes } from "../theme/constants";
 
 type RouteProps = RouteProp<RootStackParamList, 'PhotoDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -14,6 +16,7 @@ export default function PhotoDetailScreen() {
     const { projects, setProjects } = useProjects();
     const project = projects.find((p) => p.id === projectId);
     const photo = project?.photos.find((p) => p.id === photoId);
+    const styles = useScreenStyles();
 
     const [title, setTitle] = useState( photo?.title ?? '');
     const [notes, setNotes] = useState( photo?.notes ?? '');
@@ -92,47 +95,55 @@ export default function PhotoDetailScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-    },
-    image: {
-        width: '100%',
-        height: 250,
-        borderRadius: 12,
-        marginBottom: 16,
-    },
-    input: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 12,
-    },
-    notes: {
-        height: 100,
-        textAlignVertical: 'top',
-    },
-    saveButton: {
-        padding: 14,
-        borderRadius: 10,
-        alignItems: 'center',
-        backgroundColor: '#777',
-        marginBottom: 12,
-    },
-    saveText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    deleteButton: {
-        padding: 14,
-        borderRadius: 10,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'red',
-    },
-    deleteText: {
-        color: 'red',
-        fontWeight: 'bold',
-    },
-});
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: spacing.lg,
+            backgroundColor: theme.colors.background
+        },
+        image: {
+            width: '100%',
+            height: 250,
+            borderRadius: borderRadius.lg,
+            marginBottom: spacing.lg,
+        },
+        input: {
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            padding: spacing.sm,
+            marginBottom: spacing.md,
+            backgroundColor: theme.colors.card
+        },
+        notes: {
+            height: 100,
+            textAlignVertical: 'top',
+            backgroundColor: theme.colors.card
+        },
+        saveButton: {
+            padding: spacing.md,
+            borderRadius: borderRadius.md,
+            alignItems: 'center',
+            backgroundColor: theme.colors.primary,
+            marginBottom: spacing.md,
+        },
+        saveText: {
+            color: '#fff',
+            fontWeight: 'bold',
+        },
+        deleteButton: {
+            padding: spacing.md,
+            borderRadius: borderRadius.md,
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: theme.colors.delete,
+            backgroundColor: theme.colors.delete
+        },
+        deleteText: {
+            color: '#fff',
+            fontWeight: 'bold',
+        },
+    });
+}

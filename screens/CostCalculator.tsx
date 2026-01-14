@@ -1,10 +1,10 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable } from "react-native";
 import { CostResult } from "../store/types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "@react-navigation/native";
-import { CURRENCIES, LOCALE_CURRENCY_MAP } from "../store/currencies";
+import { LOCALE_CURRENCY_MAP } from "../store/currencies";
 import { useCurrency } from "../store/CurrenciesContext";
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes } from "../theme/constants";
 
 export const getAutoCurrency = () => {
     try {
@@ -16,6 +16,7 @@ export const getAutoCurrency = () => {
 };
 
 export default function CostScreen() {
+    const styles = useScreenStyles();
     const [skeinPrice, setSkeinPrice] = useState('');
     const [skeinSize, setSkeinSize] = useState('');
     const [yarnUsed, setYarnUsed] = useState('');
@@ -135,42 +136,49 @@ export default function CostScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        padding: 20
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: '600',
-        marginBottom: 20,
-        textAlign: 'center'
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 12,
-        marginBottom: 12,
-        borderRadius: 8
-    },
-    button: {
-        backgroundColor: '#445',
-        padding: 15,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 10
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: '600'
-    },
-    result: {
-        marginTop: 25,
-        padding: 15,
-        backgroundColor: '#777',
-        borderRadius: 8
-    },
-    resultText: {
-        fontSize: 16,
-        marginBottom: 5
-    }
-})
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+    
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: spacing.xl,
+            backgroundColor: theme.colors.background
+        },
+        title: {
+            fontSize: fontSizes.xxxl,
+            fontWeight: '600',
+            marginBottom: spacing.xl,
+            textAlign: 'center'
+        },
+        input: {
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            padding: spacing.md,
+            marginBottom: spacing.md,
+            borderRadius: borderRadius.md
+        },
+        button: {
+            backgroundColor: theme.colors.primary,
+            padding: spacing.lg,
+            borderRadius: borderRadius.md,
+            alignItems: 'center',
+            marginTop: spacing.md
+        },
+        buttonText: {
+            color: '#fff',
+            fontWeight: '600'
+        },
+        result: {
+            marginTop: spacing.xxl,
+            padding: spacing.lg,
+            backgroundColor: theme.colors.secondary,
+            borderRadius: borderRadius.md
+        },
+        resultText: {
+            fontSize: fontSizes.lg,
+            marginBottom: spacing.xs,
+            color: '#fff'
+        }
+    });
+}

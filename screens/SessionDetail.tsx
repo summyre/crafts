@@ -6,6 +6,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { RootStackParamList } from "../App";
 import { useProjects } from "../store/ProjectsContext";
 import { ProjectPhoto } from "../store/types";
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes } from "../theme/constants";
 
 type RouteProps = RouteProp<RootStackParamList, 'SessionDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -20,6 +22,7 @@ const formatTime = (totalSeconds: number) => {
 }
 
 export default function SessionDetailScreen() {
+    const styles = useScreenStyles();
     const { projectId, sessionId } = useRoute<RouteProps>().params;
     const navigation = useNavigation<NavProps>();
     const { projects, setProjects } = useProjects();
@@ -107,49 +110,63 @@ export default function SessionDetailScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 12
-    },
-    sectionTitle: {
-        fontWeight: 'bold',
-        marginBottom: 4
-    },
-    card: {
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: 12,
-        marginBottom: 16
-    },
-    notes: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 10,
-        minHeight: 80,
-        textAlignVertical: 'top',
-        marginBottom: 16
-    },
-    image: {
-        width: '100%',
-        height: 250,
-        borderRadius: 12,
-        marginBottom: 16
-    },
-    photoButton: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        alignItems: 'center',
-        marginBottom: 16
-    },
-    backButton: {
-        alignItems: 'center',
-        padding: 12
-    }
-});
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: spacing.lg,
+            backgroundColor: theme.colors.background
+        },
+        title: {
+            fontSize: fontSizes.xl,
+            fontWeight: 'bold',
+            marginBottom: spacing.md
+        },
+        sectionTitle: {
+            fontWeight: 'bold',
+            marginBottom: spacing.xs
+        },
+        card: {
+            borderWidth: 1,
+            borderRadius: borderRadius.lg,
+            padding: spacing.md,
+            marginBottom: spacing.lg,
+            backgroundColor: theme.colors.card
+        },
+        notes: {
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            minHeight: 80,
+            textAlignVertical: 'top',
+            marginBottom: spacing.lg,
+            backgroundColor: theme.colors.card
+        },
+        image: {
+            width: '100%',
+            height: 250,
+            borderRadius: borderRadius.lg,
+            marginBottom: spacing.lg
+        },
+        photoButton: {
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            alignItems: 'center',
+            marginBottom: spacing.lg,
+            backgroundColor: theme.colors.primary,
+            borderColor: theme.colors.border
+        },
+        backButton: {
+            alignItems: 'center',
+            padding: spacing.md,
+            marginBottom: spacing.xxxl,
+            backgroundColor: theme.colors.primary,
+            borderColor: theme.colors.border,
+            borderRadius: borderRadius.lg,
+            borderWidth: 1
+        }
+    });
+}

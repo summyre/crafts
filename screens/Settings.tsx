@@ -11,11 +11,13 @@ import { CURRENCIES, LOCALE_CURRENCY_MAP } from "../store/currencies";
 //import { getAutoCurrency } from "./CostCalculator";
 import { useCurrency } from "../store/CurrenciesContext";
 import SettingsData from "./SettingsData";
+import { spacing, borderRadius, fontSizes, shadows } from "../theme/constants";
 
 type RouteProps = RouteProp<RootStackParamList, 'Settings'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
+    const styles = useScreenStyles();
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const { currencyCode, setCurrencyCode } = useCurrency();
     const [shakeToReturn, setShakeToReturn] = useState(false);
@@ -340,205 +342,212 @@ export default function SettingsScreen() {
                         </TouchableOpacity>
                     </View>
             </Modal>
+            <View style={styles.bottomSpacer}/>
         </ScrollView>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
-    section: {
-        marginVertical: 8,
-        marginHorizontal: 16,
-        borderRadius: 12,
-        padding: 16,
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 1},
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 12,
-        color: '#333'
-    },
-    option: {
-        marginBottom: 16
-    },
-    optionText: {
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 4
-    },
-    optionSubtext: {
-        fontSize: 14,
-        color: '#666',
-        marginTop: 2
-    },
-    rowBetween: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    themeContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginTop: 8
-    },
-    themeButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        marginRight: 8,
-        marginBottom: 8,
-        minWidth: 80,
-        alignItems: 'center'
-    },
-    themeButtonActive: {
-        borderWidth: 3,
-        borderColor: 'white',
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-        elevation: 4
-    },
-    themeButtonText: {
-        color: 'white',
-        fontWeight: 'bold'
-    },
-    manualCurrencyButton: {
-        backgroundColor: '#e3f2fd',
-        padding: 12,
-        borderRadius: 8,
-        marginTop: 8,
-        alignItems: 'center'
-    },
-    manualCurrencyText: {
-        color: '#1976d2',
-        fontWeight: 'bold'
-    },
-    tutorialButton: {
-        backgroundColor: '#4a6572',
-        padding: 12,
-        borderRadius: 8,
-        marginTop: 12,
-        alignItems: 'center'
-    },
-    tutorialButtonText: {
-        color: 'white',
-        fontWeight: 'bold'
-    },
-    supportOption: {
-        paddingVertical: 14,
-        borderWidth: 1,
-        borderBottomColor: '#f0f0f0'
-    },
-    supportOptionText: {
-        fontSize: 16,
-        color: '#1976d2'
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)'
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 20,
-        width: '80%',
-        maxHeight: '70%'
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 16,
-        textAlign: 'center'
-    },
-    currencyItem: {
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0'
-    },
-    currencyText: {
-        fontSize: 16
-    },
-    modalCloseButton: {
-        marginTop: 16,
-        padding: 12,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 8,
-        alignItems: 'center'
-    },
-    modalCloseButtonText: {
-        fontSize: 16,
-        color: '#666'
-    },
-    tutorialModal: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20
-    },
-    tutorialTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20
-    },
-    tutorialText: {
-        fontSize: 16,
-        lineHeight: 24,
-        textAlign: 'left',
-        marginBottom: 30
-    },
-    tutorialCloseButton: {
-        backgroundColor: '#4a6572',
-        paddingVertical: 12,
-        paddingHorizontal: 40,
-        borderRadius: 8
-    },
-    tutorialCloseButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold'
-    },
-    row: {
-        flexDirection: 'row',
-        marginTop: 8
-    },
-    fontOption: {
-        padding: 8,
-        marginRight: 8,
-        color: '#666'
-    },
-    fontOptionActive: {
-        color: '#4a6572',
-        fontWeight: 'bold',
-        textDecorationLine: 'underline'
-    },
-    unitButton: {
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        marginRight: 8
-    },
-    unitButtonActive: {
-        backgroundColor: '#4a6572',
-        borderColor: '#4a6572'
-    },
-    unitButtonText: {
-        color: '#333'
-    },
-    currentSelection: {
-        padding: 12,
-        color: '#333',
-        textAlign: 'center'
-    }
-});
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+
+    return StyleSheet.create({
+        container: {
+            flex: 1
+        },
+        section: {
+            marginVertical: 8,
+            marginHorizontal: 16,
+            borderRadius: 12,
+            padding: 16,
+            backgroundColor: theme.colors.card
+        },
+        sectionTitle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginBottom: 12,
+            color: theme.colors.text
+        },
+        option: {
+            marginBottom: 16
+        },
+        optionText: {
+            fontSize: 16,
+            color: theme.colors.text,
+            marginBottom: 4
+        },
+        optionSubtext: {
+            fontSize: 14,
+            color: '#666',
+            marginTop: 2
+        },
+        rowBetween: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+        },
+        themeContainer: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginTop: 8
+        },
+        themeButton: {
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            borderRadius: 20,
+            marginRight: 8,
+            marginBottom: 8,
+            minWidth: 80,
+            alignItems: 'center'
+        },
+        themeButtonActive: {
+            borderWidth: 3,
+            borderColor: 'white',
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.3,
+            shadowRadius: 3,
+            elevation: 4
+        },
+        themeButtonText: {
+            color: 'white',
+            fontWeight: 'bold'
+        },
+        manualCurrencyButton: {
+            backgroundColor: '#e3f2fd',
+            padding: 12,
+            borderRadius: 8,
+            marginTop: 8,
+            alignItems: 'center'
+        },
+        manualCurrencyText: {
+            color: '#1976d2',
+            fontWeight: 'bold'
+        },
+        tutorialButton: {
+            backgroundColor: '#4a6572',
+            padding: 12,
+            borderRadius: 8,
+            marginTop: 12,
+            alignItems: 'center'
+        },
+        tutorialButtonText: {
+            color: 'white',
+            fontWeight: 'bold'
+        },
+        supportOption: {
+            paddingVertical: 14,
+            borderWidth: 1,
+            borderBottomColor: theme.colors.border
+        },
+        supportOptionText: {
+            fontSize: 16,
+            color: '#1976d2',
+            marginRight: 'auto',
+            padding: spacing.xs,
+            paddingHorizontal: spacing.md
+        },
+        modalContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.5)'
+        },
+        modalContent: {
+            backgroundColor: theme.colors.card,
+            borderRadius: 12,
+            padding: 20,
+            width: '80%',
+            maxHeight: '70%'
+        },
+        modalTitle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginBottom: 16,
+            textAlign: 'center'
+        },
+        currencyItem: {
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: '#f0f0f0'
+        },
+        currencyText: {
+            fontSize: 16
+        },
+        modalCloseButton: {
+            marginTop: 16,
+            padding: 12,
+            backgroundColor: '#f0f0f0',
+            borderRadius: 8,
+            alignItems: 'center'
+        },
+        modalCloseButtonText: {
+            fontSize: 16,
+            color: '#666'
+        },
+        tutorialModal: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20
+        },
+        tutorialTitle: {
+            fontSize: 24,
+            fontWeight: 'bold',
+            marginBottom: 20
+        },
+        tutorialText: {
+            fontSize: 16,
+            lineHeight: 24,
+            textAlign: 'left',
+            marginBottom: 30
+        },
+        tutorialCloseButton: {
+            backgroundColor: '#4a6572',
+            paddingVertical: 12,
+            paddingHorizontal: 40,
+            borderRadius: 8
+        },
+        tutorialCloseButtonText: {
+            color: 'white',
+            fontSize: 16,
+            fontWeight: 'bold'
+        },
+        row: {
+            flexDirection: 'row',
+            marginTop: 8
+        },
+        /*fontOption: {
+            padding: 8,
+            marginRight: 8,
+            color: theme.colors.border
+        },
+        fontOptionActive: {
+            color: '#4a6572',
+            fontWeight: 'bold',
+            textDecorationLine: 'underline'
+        },*/
+        /*unitButton: {
+            paddingVertical: 6,
+            paddingHorizontal: 12,
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: '#ddd',
+            marginRight: 8
+        },
+        unitButtonActive: {
+            backgroundColor: '#4a6572',
+            borderColor: '#4a6572'
+        },
+        unitButtonText: {
+            color: theme.colors.border
+        },*/
+        currentSelection: {
+            padding: 12,
+            color: theme.colors.text,
+            textAlign: 'center'
+        },
+        bottomSpacer: {
+            padding: spacing.lg
+        }
+    });
+}

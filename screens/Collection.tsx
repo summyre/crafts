@@ -4,10 +4,13 @@ import { useCollection } from '../store/CollectionContext';
 import { CollectionItem } from '../store/collectionStore';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes, shadows } from "../theme/constants";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Collection'>;
 
 export default function CollectionScreen({navigation}: Props){
+    const styles = useScreenStyles();
     const { collection, removeItem } = useCollection();
     const [filter, setFilter] = useState<'All'|'Yarn'|'Thread'>('All');
     const filtered = collection.filter(item => filter === 'All' ? true : item.type === filter);
@@ -17,7 +20,9 @@ export default function CollectionScreen({navigation}: Props){
             {item.image ? (
                 <Image source={{uri: item.image}} style={styles.image} />
             ): (
-                <View style={styles.placeholder}><Text>No image</Text></View>
+                <View style={styles.placeholder}>
+                    <Text style={styles.placeholderText}>No image</Text>
+                </View>
             )}
 
             <View style={styles.info}>
@@ -71,6 +76,7 @@ export default function CollectionScreen({navigation}: Props){
                     data={filtered}
                     keyExtractor={item => item.id}
                     renderItem={renderItem}
+                    scrollEnabled={true}
                     contentContainerStyle={styles.list}/>
             )}
 
@@ -83,119 +89,129 @@ export default function CollectionScreen({navigation}: Props){
     );
 }
 
-const styles = StyleSheet.create({
-    container:{
-        flex: 1,
-        padding: 16,
-    },
-    header: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 16,
-    },
-    card: {
-        flexDirection: 'row',
-        padding: 12,
-        borderWidth: 1,
-        borderRadius: 10,
-        marginBottom: 12,
-    },
-    image: {
-        width: 70,
-        height: 70,
-        borderRadius: 8,
-        marginRight: 12,
-    },
-    info: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    name: {
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    meta: {
-        fontSize: 12,
-        color: '#666',
-        marginVertical: 4,
-    },
-    stock: {
-        fontSize: 12,
-        fontWeight: '500'
-    },
-    filters: {
-        flexDirection: 'row',
-        fontSize: 12,
-    },
-    filterButton: {
-        padding: 8,
-        marginRight: 8, 
-        borderWidth: 1,
-        borderRadius: 8,
-    },
-    filterActive: {
-        backgroundColor: '#333'
-    },
-    filterText: {
-        color: '#777',
-    },
-    filterActiveText: {
-        color: 'white',
-        fontWeight: '600',
-    },
-    list: {
-        paddingBottom: 20,
-    },
-    placeholder: {
-        width: 70,
-        height: 70,
-        borderRadius: 8, 
-        marginRight: 12, 
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#eee'
-    },
-    addButton: {
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 6,
-        backgroundColor: '#555'
-    },
-    addText: {
-        color: 'white',
-        fontWeight: 'bold'
-    },
-    emptyState: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingTop: 50,
-    },
-    emptyText: {
-        fontSize: 16,
-        color: '#555',
-        textAlign: 'center',
-    },
-    fab: {
-        position: 'absolute',
-        right: 20,
-        bottom: 20,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#444',
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3},
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-    },
-    fabText: {
-        color: 'white',
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginTop: -2,
-    },
-});
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+    
+    return StyleSheet.create({
+        container:{
+            flex: 1,
+            padding: 16,
+            backgroundColor: theme.colors.background
+        },
+        header: {
+            fontSize: fontSizes.xl,
+            fontWeight: '600',
+            marginBottom: spacing.lg,
+        },
+        card: {
+            flexDirection: 'row',
+            padding: spacing.md,
+            borderWidth: 1,
+            borderRadius: borderRadius.lg,
+            marginBottom: spacing.md,
+            borderColor: theme.colors.border
+        },
+        image: {
+            width: 80,
+            height: 80,
+            borderRadius: borderRadius.md,
+            marginRight: spacing.md,
+            backgroundColor: theme.colors.border
+        },
+        info: {
+            flex: 1,
+            justifyContent: 'center',
+        },
+        name: {
+            fontSize: fontSizes.lg,
+            fontWeight: '600',
+        },
+        meta: {
+            fontSize: fontSizes.sm,
+            color: theme.colors.text,
+            marginVertical: spacing.xs,
+        },
+        stock: {
+            fontSize: fontSizes.sm,
+            fontWeight: '500'
+        },
+        filters: {
+            flexDirection: 'row',
+            fontSize: fontSizes.sm,
+        },
+        filterButton: {
+            padding: spacing.sm,
+            marginRight: spacing.sm, 
+            borderWidth: 1,
+            borderRadius: borderRadius.md,
+            borderColor: theme.colors.border
+        },
+        filterActive: {
+            backgroundColor: theme.colors.secondary
+        },
+        filterText: {
+            color: theme.colors.text,
+        },
+        filterActiveText: {
+            color: 'white',
+            fontWeight: '600',
+        },
+        list: {
+            paddingBottom: spacing.xl,
+            marginTop: spacing.md
+        },
+        placeholder: {
+            width: 70,
+            height: 70,
+            borderRadius: borderRadius.md, 
+            marginRight: spacing.md, 
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme.colors.border
+        },
+        placeholderText: {
+            fontSize: fontSizes.sm
+        },
+        addButton: {
+            paddingHorizontal: spacing.md,
+            paddingVertical: 10,
+            borderRadius: borderRadius.sm,
+            backgroundColor: theme.colors.primary,
+            alignItems: 'center',
+            marginTop: 'auto'
+        },
+        addText: {
+            color: 'white',
+            fontWeight: 'bold'
+        },
+        emptyState: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingTop: 50,
+        },
+        emptyText: {
+            fontSize: fontSizes.lg,
+            color: theme.colors.text,
+            textAlign: 'center',
+        },
+        fab: {
+            position: 'absolute',
+            right: 20,
+            top: 10,
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            backgroundColor: theme.colors.primary,
+            justifyContent: 'center',
+            alignItems: 'center',
+            ...shadows
+        },
+        fabText: {
+            color: 'white',
+            fontSize: 28,
+            fontWeight: 'bold',
+            marginTop: -2,
+        },
+    });
+}

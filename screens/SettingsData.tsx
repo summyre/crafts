@@ -6,8 +6,11 @@ import { exportToJSON } from "../utils/exportData";
 import { importJSON } from "../utils/importData";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCollection } from "../store/CollectionContext";
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes, shadows } from "../theme/constants";
 
 export default function SettingsData() {
+    const styles = useScreenStyles();
     const { projects, setProjects } = useProjects();
     const { patterns, setPatterns } = usePatterns();
 
@@ -61,32 +64,36 @@ export default function SettingsData() {
     )
 };
 
-const styles = StyleSheet.create({
-    container: {
-        padding: 16
-    },
-    header: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 12
-    },
-    button: {
-        padding: 14,
-        borderRadius: 10,
-        backgroundColor: '#444',
-        marginBottom: 10,
-        alignItems: 'center'
-    },
-    danger: {
-        backgroundColor: '#b91c1c'
-    },
-    text: {
-        color: 'white',
-        fontWeight: '600'
-    },
-    divider: {
-        height: 1, 
-        backgroundColor: '#ddd',
-        marginVertical: 16
-    }
-})
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+
+    return StyleSheet.create({
+        container: {
+            padding: 16
+        },
+        header: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginBottom: 12
+        },
+        button: {
+            padding: 14,
+            borderRadius: 10,
+            backgroundColor: theme.colors.primary,
+            marginBottom: 10,
+            alignItems: 'center'
+        },
+        danger: {
+            backgroundColor: theme.colors.delete
+        },
+        text: {
+            color: 'white',
+            fontWeight: '600'
+        },
+        divider: {
+            height: 1, 
+            backgroundColor: '#ddd',
+            marginVertical: 16
+        }
+    });
+}

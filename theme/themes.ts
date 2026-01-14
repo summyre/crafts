@@ -8,6 +8,7 @@ export type Theme = {
         border: string;
         secondary: string;
         milestone: string;
+        delete: string;
     };
 };
 
@@ -21,7 +22,8 @@ export const themes: Record<string, Theme> = {
             primary: '#4a6572',
             border: '#e0e0e0',
             secondary: '#4a6572',
-            milestone: '#4a6572'
+            milestone: '#4a6572',
+            delete: '#ff0000'
         }
     },
     dark: {
@@ -33,7 +35,8 @@ export const themes: Record<string, Theme> = {
             primary: '#f9aa33',
             border: '#333333',
             secondary: '#4a6572',
-            milestone: '#4a6572'
+            milestone: '#4a6572',
+            delete: '#ff0000'
         }
     },
     pastel: {
@@ -45,7 +48,8 @@ export const themes: Record<string, Theme> = {
             primary: '#d4a5a5',
             border: '#e8cfcf',
             secondary: '#b39898',
-            milestone: '#4a6572'
+            milestone: '#4a6572',
+            delete: '#ff0000'
         }
     },
     nature: {
@@ -57,7 +61,8 @@ export const themes: Record<string, Theme> = {
             primary: '#4caf50',
             border: '#c8e6c9',
             secondary: '#375b38',
-            milestone: '#f2c657'
+            milestone: '#f2c657',
+            delete: '#910f0f'
         }
     }
 };

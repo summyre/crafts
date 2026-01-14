@@ -11,11 +11,14 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import PDFViewer from "../hooks/pdfViewerV2";
+import { useTheme } from "../theme/ThemeContext";
+import { spacing, borderRadius, fontSizes } from "../theme/constants";
 
 type RouteProps = RouteProp<RootStackParamList, 'PatternWishlist'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
 
 export default function PatternWishlistScreen() {
+    const styles = useScreenStyles();
     const { projectId } = useRoute<RouteProps>().params;
     const navigation = useNavigation<NavProps>();
     const { projects, setProjects } = useProjects();
@@ -179,7 +182,7 @@ export default function PatternWishlistScreen() {
 
                 {!item.imageUri && item.pdf ? (
                     <View style={styles.placeholder}>
-                        <Text>PDF attached</Text>
+                        <Text style={styles.attach}>PDF attached</Text>
                     </View>
                 ) : null}
 
@@ -248,7 +251,7 @@ export default function PatternWishlistScreen() {
                 onRequestClose={() => setPdfModalVisible(false)}
                 animationType='slide'>
                     <View style={{flex: 1}}>
-                        <TouchableOpacity style={{padding: 12, backgroundColor: '#555'}} onPress={() => setPdfModalVisible(false)}>
+                        <TouchableOpacity style={styles.pdf} onPress={() => setPdfModalVisible(false)}>
                             <Text style={{color: '#fff'}}>Close PDF</Text>
                         </TouchableOpacity>
                         {pdfModalUri ? (
@@ -270,85 +273,107 @@ export default function PatternWishlistScreen() {
     )
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16
-    },
-    card: {
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 10,
-        padding: 12
-    },
-    title: {
-        fontWeight: 'bold',
-        marginTop: 8
-    },
-    patternTitle: {
-        fontSize: 16,
-        fontWeight: '600'
-    },
-    notes: {
-        color: '#555',
-        marginTop: 6
-    },
-    image: {
-        width: '100%',
-        height: 150,
-        borderRadius: 8
-    },
-    placeholder: {
-        width: '100%',
-        height: 150,
-        backgroundColor: '#eee',
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    input: {
-        borderWidth: 1, 
-        borderColor: '#ccc',
-        padding: 8,
-        marginVertical: 8,
-        borderRadius: 8
-    },
-    saveButton: {
-        backgroundColor: 'green',
-        padding: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginVertical: 8
-    },
-    addButton: {
-        backgroundColor: '#333',
-        padding: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginBottom: 16
-    },
-    pickButton: {
-        backgroundColor: '#555',
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 8,
-        alignItems: 'center'
-    },
-    deleteText: {
-        color: 'red',
-        marginTop: 8,
-        fontWeight: 'bold'
-    },
-    mutedText: {
-        fontStyle: 'italic',
-        color: '#777'
-    },
-    textArea: {
-        height: 80
-    },
-    pdfText: {
-        color: '#2563eb',
-        fontWeight: '600'
-    }
-})
+const useScreenStyles = () => {
+    const { theme } = useTheme();
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: spacing.lg,
+            backgroundColor: theme.colors.background
+        },
+        card: {
+            marginBottom: spacing.md,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            borderRadius: spacing.md,
+            padding: spacing.md,
+        },
+        title: {
+            fontWeight: 'bold',
+            marginTop: spacing.sm,
+            fontSize: fontSizes.xxxl
+        },
+        patternTitle: {
+            fontSize: fontSizes.lg,
+            fontWeight: '600',
+            marginTop: spacing.sm
+        },
+        notes: {
+            color: theme.colors.text,
+            marginTop: spacing.xs
+        },
+        image: {
+            width: '100%',
+            height: 150,
+            borderRadius: borderRadius.md
+        },
+        placeholder: {
+            width: '100%',
+            height: 50,
+            backgroundColor: theme.colors.background,
+            borderRadius: borderRadius.md,
+            justifyContent: 'center',
+            alignItems: 'center'
+        },
+        input: {
+            borderWidth: 1, 
+            borderColor: theme.colors.border,
+            padding: spacing.sm,
+            marginVertical: spacing.sm,
+            borderRadius: borderRadius.md,
+            backgroundColor: theme.colors.card,
+            marginBottom: spacing.lg
+        },
+        saveButton: {
+            backgroundColor: theme.colors.primary,
+            padding: spacing.md,
+            borderRadius: borderRadius.md,
+            alignItems: 'center',
+            marginVertical: spacing.sm
+        },
+        /*addButton: {
+            backgroundColor: theme.colors.secondary,
+            padding: spacing.md,
+            borderRadius: borderRadius.md,
+            alignItems: 'center',
+            marginBottom: spacing.lg
+        },*/
+        pickButton: {
+            backgroundColor: theme.colors.secondary,
+            padding: spacing.md,
+            borderRadius: borderRadius.md,
+            marginBottom: spacing.md,
+            alignItems: 'center'
+        },
+        deleteText: {
+            color: theme.colors.delete,
+            marginTop: spacing.md,
+            fontWeight: 'bold'
+        },
+        mutedText: {
+            fontStyle: 'italic',
+            color: theme.colors.text,
+            marginTop: spacing.xs,
+            marginBottom: spacing.xs
+        },
+        textArea: {
+            height: 80
+        },
+        pdfText: {
+            color: '#2563eb',
+            fontWeight: '600'
+        },
+        pdf: {
+            padding: spacing.md,
+            backgroundColor: theme.colors.background
+        },
+        attach: {
+            marginRight: 245,
+            fontSize: fontSizes.sm,
+            color: theme.colors.secondary,
+            textAlign: 'left',
+            marginTop: spacing.md
+        }
+    });
+}
