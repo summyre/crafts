@@ -223,7 +223,8 @@ export default function SettingsScreen() {
                 <Text style={[styles.sectionTitle, {color: theme.colors.textDark}]}>Currency</Text>
                 <View style={styles.option}>
                     <Text style={[styles.optionText, {color: theme.colors.textDark}]}>Cost Calculator Currency</Text>
-                    <Picker selectedValue={currencyCode} onValueChange={handleCurrencyChange} style={{backgroundColor: theme.colors.background, color: theme.colors.textDark}}>
+                    <Picker selectedValue={currencyCode} onValueChange={handleCurrencyChange} 
+                        style={{backgroundColor: theme.colors.background, color: theme.colors.textDark}}>
                         <Picker.Item label="Auto-detect (device locale)" value="auto" />
                         <Picker.Item label="Set manually" value="manual" />
                         {/*{CURRENCIES.map((curr) => (
