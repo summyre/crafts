@@ -49,14 +49,14 @@ export default function SettingsData() {
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Data Management</Text>
-            <TouchableOpacity style={styles.button} onPress={exportProjects}>
+            {/*<TouchableOpacity style={styles.button} onPress={exportProjects}>
                 <Text style={styles.text}>Export Projects</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={importProjects}>
                 <Text style={styles.text}>Import Projects</Text>
             </TouchableOpacity>
 
-            <View style={styles.divider}/>
+            <View style={styles.divider}/>*/}
             <TouchableOpacity style={[styles.button, styles.danger]} onPress={clearCache}>
                 <Text style={styles.text}>Clear Cache</Text>
             </TouchableOpacity>
