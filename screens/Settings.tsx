@@ -133,6 +133,20 @@ export default function SettingsScreen() {
         return LOCALE_CURRENCY_MAP[locale] ?? 'GBP';
     };
 
+    const cloudSync = async (value: boolean) => {
+        await saveSetting('cloudSync', value);
+
+        Alert.alert('Coming Soon', 'Cloud sync has not been implemented yet. This feature will be available in a future update.',
+            [{text: 'OK'}]
+        );
+    };
+
+    const lock = () => {
+        Alert.alert('Coming Soon', 'PIN has not been implemented yet. This feature will be available in a future update.',
+            [{text: 'OK'}]
+        );
+    }
+
     const renderAdditionalSettings = () => (
         <View style={styles.section}>
             <Text style={styles.sectionTitle}>Additional Settings</Text>
@@ -150,15 +164,18 @@ export default function SettingsScreen() {
                 </View>
             </View>*/}
 
+            <Text style={styles.optionText}>Privacy and Security</Text>
             <TouchableOpacity style={styles.option} onPress={() => Linking.openURL('https://github.com/summyre/crafts')}>
-                <Text style={styles.optionText}>Privacy and Security</Text>
-                <Text style={styles.optionSubtext}>Privacy policy, lock app with PIN</Text>
+                <Text style={styles.optionSubtext}>Privacy policy</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.option} onPress={lock}>
+                <Text style={styles.optionSubtext}>Lock app with PIN</Text>
             </TouchableOpacity>
 
             <View style={styles.option}>
                 <View style={styles.rowBetween}>
                     <Text style={styles.optionText}>Cloud Sync</Text>
-                    <Switch value={false} onValueChange={(value) => saveSetting('cloudSync', value)}/>
+                    <Switch value={false} onValueChange={cloudSync}/>
                 </View>
                 <Text style={styles.optionSubtext}>Backup projects to cloud</Text>
             </View>

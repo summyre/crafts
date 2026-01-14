@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Alert, ScrollView } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
@@ -7,6 +7,10 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useProjects } from "../store/ProjectsContext";
 import { usePatterns } from "../store/PatternsContext";
 import { Session, ProjectPhoto, TimelineItem, Pattern } from "../store/types";
+import { useStyles } from "../theme/useStyles";
+import { useTheme } from "../theme/ThemeContext";
+import { createProjectDetailStyles } from "../theme/styles";
+
 
 type RouteProps = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type NavProps = NativeStackNavigationProp<RootStackParamList>;
@@ -20,6 +24,10 @@ const formatTime = (totalSeconds: number) => {
 };
 
 export default function ProjectDetailScreen() {
+    const styles = useStyles();
+    const { theme } = useTheme();
+    const screenStyles = createProjectDetailStyles(theme);
+
     const { projectId } = useRoute<RouteProps>().params;
     const navigation = useNavigation<NavProps>();
     const [activeTab, setActiveTab] = useState<ProjectTab>('timeline');
@@ -49,7 +57,7 @@ export default function ProjectDetailScreen() {
         
         return (
             <TouchableOpacity
-                style={styles.timelineItem}
+                style={screenStyles.timelineItem}
                 onPress={() =>
                     navigation.navigate('PhotoDetail', {projectId, photoId: item.id})
                 }
@@ -65,16 +73,16 @@ export default function ProjectDetailScreen() {
                         ]
                     )
                 }>
-                <Image source={{uri: item.uri}} style={styles.timelineImage}/>
+                <Image source={{uri: item.uri}} style={screenStyles.timelineImage}/>
 
-                <View style={styles.timelineContent}>
-                    <Text style={styles.photoTitle}>{item.title || 'Progress photo'}</Text>
+                <View style={screenStyles.timelineContent}>
+                    <Text style={screenStyles.photoTitle}>{item.title || 'Progress photo'}</Text>
 
                     {item.notes ? (
-                        <Text style={styles.notes}>{item.notes}</Text>
+                        <Text style={screenStyles.notes}>{item.notes}</Text>
                     ): null}
 
-                    <Text style={styles.timestamp}>
+                    <Text style={screenStyles.timestamp}>
                         {date.toLocaleDateString([], {
                             hour: '2-digit',
                             minute: '2-digit'
@@ -153,20 +161,20 @@ export default function ProjectDetailScreen() {
             const session = project.sessions.find(s => s.id === item.sessionId);
             if (!session) {
                 return (
-                    <View style={styles.timelineCard}>
+                    <View style={screenStyles.timelineCard}>
                         <Text style={styles.mutedText}>Session not found (may have been deleted)</Text>
                     </View>
                 );
             };
 
             return (
-                <View style={styles.timelineCard}>
-                    <View style={styles.sessionBadge}>
-                        <Text style={styles.sessionBadgeText}>SESSION</Text>
+                <View style={screenStyles.timelineCard}>
+                    <View style={screenStyles.sessionBadge}>
+                        <Text style={screenStyles.sessionBadgeText}>SESSION</Text>
                     </View>
                     
                     {Object.entries(session.counters.values).map(([name, value]) => (
-                        <Text key={name} style={styles.counterText}>{name}: {value}</Text>
+                        <Text key={name} style={screenStyles.counterText}>{name}: {value}</Text>
                     ))}
 
                     <Text style={styles.timeText}>Time: {formatTime(session.seconds)}</Text>
@@ -180,17 +188,17 @@ export default function ProjectDetailScreen() {
             if (!photo) return null;
 
             return (
-                <View style={styles.timelineCard}>
-                    <View style={styles.sessionBadge}>
-                        <Text style={styles.sessionBadgeText}>PHOTO</Text>
+                <View style={screenStyles.timelineCard}>
+                    <View style={screenStyles.sessionBadge}>
+                        <Text style={screenStyles.sessionBadgeText}>PHOTO</Text>
                     </View>
                     <TouchableOpacity
-                        style={styles.timelineItem}
+                        style={screenStyles.timelineItem}
                         onPress={() => navigation.navigate('PhotoDetail', {projectId, photoId: item.photoId})}>
-                            <Image source={{uri: photo.uri}} style={styles.timelineImage} />
-                            <View style={styles.timelineContent}>
-                                <Text style={styles.photoTitle}>{photo.title || 'Progress photo'}</Text>
-                                <Text style={styles.timestamp}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                            <Image source={{uri: photo.uri}} style={screenStyles.timelineImage} />
+                            <View style={screenStyles.timelineContent}>
+                                <Text style={screenStyles.photoTitle}>{photo.title || 'Progress photo'}</Text>
+                                <Text style={screenStyles.timestamp}>{new Date(item.createdAt).toLocaleDateString()}</Text>
                             </View>
                     </TouchableOpacity>
                 </View>
@@ -202,11 +210,11 @@ export default function ProjectDetailScreen() {
             if (!pattern) return null;
         
             return (
-                <View style={styles.timelineCard}>
-                    <View style={styles.sessionBadge}>
-                        <Text style={styles.sessionBadgeText}>PATTERN</Text>
+                <View style={screenStyles.timelineCard}>
+                    <View style={screenStyles.sessionBadge}>
+                        <Text style={screenStyles.sessionBadgeText}>PATTERN</Text>
                     </View>
-                    <Text style={styles.patternTitle}>{pattern.title}</Text>
+                    <Text style={screenStyles.patternTitle}>{pattern.title}</Text>
                     <Text style={styles.dateText}>{new Date(item.createdAt).toLocaleString()}</Text>
                 </View>
             );
@@ -219,19 +227,19 @@ export default function ProjectDetailScreen() {
 
         return (
             <TouchableOpacity
-                style={styles.timelineItem}
+                style={screenStyles.timelineItem}
                 onPress={() =>
                     navigation.navigate('SessionDetail', {projectId, sessionId: item.id})
                 }>
-                    <View style={styles.timelineContent}>
-                        <Text style={styles.photoTitle}>{date.toLocaleDateString()}</Text>
+                    <View style={screenStyles.timelineContent}>
+                        <Text style={screenStyles.photoTitle}>{date.toLocaleDateString()}</Text>
                     </View>
 
-                    <TouchableOpacity style={styles.milestoneButton} onPress={() => handleToggleMilestone(item.id)}>
-                        <Text style={{color:item.isMilestone ? 'gold': '#444'}}>{item.isMilestone ? 'Milestone' : 'Mark as Milestone'}</Text>
+                    <TouchableOpacity style={screenStyles.milestoneButton} onPress={() => handleToggleMilestone(item.id)}>
+                        <Text style={{color:item.isMilestone ? theme.colors.milestone : theme.colors.secondary}}>{item.isMilestone ? 'Milestone' : 'Mark as Milestone'}</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.timestamp}>
+                    <Text style={screenStyles.timestamp}>
                         Time: {formatTime(item.seconds)}
                     </Text>
             </TouchableOpacity>
@@ -249,11 +257,11 @@ export default function ProjectDetailScreen() {
             style={styles.scrollView}
             contentContainerStyle={styles.scrollViewContainer}
             showsVerticalScrollIndicator={true}>
-                <View style={styles.headerContainer}>
+                <View style={screenStyles.headerContainer}>
                     <Text style={styles.title}>{project.title}</Text>
 
-                    <TouchableOpacity style={styles.startButton} onPress={() => navigation.navigate('StitchSession', {projectId})}>
-                        <Text style={styles.startButtonText}>Start Session</Text>
+                    <TouchableOpacity style={screenStyles.startButton} onPress={() => navigation.navigate('StitchSession', {projectId})}>
+                        <Text style={screenStyles.startButtonText}>Start Session</Text>
                     </TouchableOpacity>
 
                     <View style={styles.tabBar}>
@@ -262,7 +270,7 @@ export default function ProjectDetailScreen() {
                                 key={tab}
                                 style={[styles.tabButton, activeTab === tab && styles.tabButtonActive]}
                                 onPress={() => setActiveTab(tab)}>
-                                    <Text style={[styles.startButtonText, activeTab === tab && styles.tabTextActive]}>
+                                    <Text style={[screenStyles.startButtonText, activeTab === tab && styles.tabTextActive]}>
                                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
                                     </Text>
                             </TouchableOpacity>
@@ -349,9 +357,9 @@ export default function ProjectDetailScreen() {
                     {activeTab === 'photos' && (
                         <>
                         <TouchableOpacity
-                            style={styles.addButton}
+                            style={screenStyles.addButton}
                             onPress={() => handleAddPhoto()}>
-                                <Text style={styles.addButtonText}>+ Add Photo</Text>
+                                <Text style={screenStyles.addButtonText}>+ Add Photo</Text>
                         </TouchableOpacity>
 
                         {sortedPhotos.length > 0 ? (
@@ -367,296 +375,37 @@ export default function ProjectDetailScreen() {
                         )}
                         </>
                     )}
-                    <View style={styles.bottomSpacer}/>
+                    <View style={screenStyles.bottomSpacer}/>
                 </View>
             </ScrollView>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        paddingBottom: 40
-    },
-    headerContainer: {
-        paddingBottom: 20
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollViewContainer: {
-        paddingBottom: 40,
-        paddingHorizontal: 10,
-        paddingVertical: 10
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    photoCard: {
-        flex: 1/3,
-        aspectRatio: 1,
-        margin: 4,
-        borderRadius: 8,
-        overflow: 'hidden',
-        borderWidth: 1,
-    },
-    photo: {
-        width: '100%',
-        height: 200,
-        borderRadius: 8,
-        marginTop: 8
-    },
-    photoTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 4
-    },
-    subtitle: {
-        fontSize: 14,
-        color: '#333',
-        marginBottom: 8,
-    },
-    notes: {
-        fontSize: 14,
-        marginVertical: 6,
-        color: '#666',
-        lineHeight: 20
-    },
-    addButton: {
-        padding: 16,
-        borderWidth: 1,
-        borderRadius: 12,
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    smallAddButton: {
-        padding: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#ddd'
-    },
-    gallery: {
-        paddingBottom: 20,
-    },
-    emptyText: {
-        textAlign: 'center',
-        marginTop: 20,
-        marginBottom: 30,
-        color: '#222',
-        fontStyle: 'italic'
-    },
-    addButtonText: {
-        fontWeight: 'bold',
-    },
-    smallAddButtonText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#555'
-    },
-    deleteButton: {
-        marginTop: 24,
-        padding: 14,
-        borderRadius: 10,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'red',
-    },
-    deleteText: {
-        color: 'red',
-        fontWeight: 'bold',
-    },
-    editText: {
-        color: '#444',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    timelineItem: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        marginBottom: 20,
-        paddingBottom: 16,
-        borderBottomWidth: 1,
-        borderColor: '#333',
-        paddingHorizontal: 4
-    },
-    timelineImage: {
-        width: 70,
-        height: 70,
-        borderRadius: 8,
-        marginRight: 12,
-        flexShrink: 0,
-    },
-    timelineContent: {
-        flex: 1,
-        justifyContent: 'center'
-    },
-    timestamp: {
-        fontSize: 12,
-        color: '#777',
-        marginTop: 4
-    },
-    sessionBadge: {
-        backgroundColor: '#e0e7ff',
-        borderRadius: 6,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        marginRight: 8,
-        alignSelf: 'flex-start'
-    },
-    sessionBadgeText: {
-        fontSize: 10,
-        fontWeight: 'bold'
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginTop: 24,
-        marginBottom: 16
-    },
-    sectionHeader: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 12
-    },
-    sectionHeaderRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12
-    },
-    milestoneButton: {
-        marginLeft: 10,
-        padding: 6,
-        paddingHorizontal: 10,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: 'gold',
-        alignSelf: 'flex-start'
-    },
-    patternTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: 4
-    },
+/*
     patternLink: {
-        fontSize: 12,
+        fontSize: 12,            
         color: '#0066cc'
     },
-    patternItem: {
-        padding: 12,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        marginBottom: 8,
-        backgroundColor: '#fafafa'
-    },
-    compactPatternTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginBottom: 2
-    },
-    compactPatternLink: {
-        fontSize: 11
-    },
-    compactPatternItem: {
-        padding: 10,
-        borderWidth: 1,
-        borderRadius: 8,
-        marginBottom: 6,
-    },
-    compactPatternContainer: {
-        marginBottom: 8
-    },
-    timelineList: {
-        marginBottom: 8
-    },
-    listContainer: {
-        marginBottom: 24
-    },
-    startButton: {
-        padding: 18,
-        backgroundColor: '#4f46e5',
-        borderRadius: 12,
-        alignItems: 'center',
-        marginBottom: 24,
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.1,
-        shadowRadius:  4,
-        elevation: 3
-    },
-    startButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16
-    },
-    timelineCard: {
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16
-    },
-    timelineTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 10
-    },
-    counterText: {
-        fontSize: 14,
-        marginBottom: 4
-    },
-    timeText: {
-        marginTop: 8,
-        fontStyle: 'italic'
-    },
-    dateText: {
-        marginTop: 8,
-        fontSize: 12,
-        color: '#555'
-    },
-    mutedText: {
-        color: '#777',
-        fontStyle: 'italic',
-        marginBottom: 24,
-        paddingVertical: 12,
-        textAlign: 'center'
-    },
-    compactSection: {
-        marginBottom: 24
-    },
-    sectionSpacer: {
-        height: 20
-    },
-    bottomSpacer: {
-        height: 60
-    },
-    tabBar: {
-        flexDirection: 'row',
-        borderWidth: 1,
-        borderColor: '#cc',
-        borderRadius: 12,
-        overflow: 'hidden',
-        marginBottom: 24
-    },
-    tabButton: {
-        flex: 1,
-        paddingVertical: 12,
-        alignItems: 'center',
-        backgroundColor: '#f2f2f2'
-    },
-    tabButtonActive: {
-        backgroundColor: '#4f46e5'
-    },
-    tabText: {
-        fontWeight: '600',
-        color: '#333'
-    },
-    tabTextActive: {
-        color: 'white'
-    }
-});
+        compactPatternTitle: {
+            fontSize: 14,
+            fontWeight: '600',
+            marginBottom: 2
+        },
+        compactPatternLink: {
+            fontSize: 11
+        },
+        compactPatternItem: {
+            padding: 10,
+            borderWidth: 1,
+            borderRadius: 8,
+            marginBottom: 6,
+        },
+        compactPatternContainer: {
+            marginBottom: 8
+        }
+        
+        compactSection: {
+            marginBottom: 24
+        },
+        
+    }); */

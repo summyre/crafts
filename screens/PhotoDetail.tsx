@@ -67,7 +67,7 @@ export default function PhotoDetailScreen() {
                 }>
                     <Image source={{uri:photo.uri}} style={styles.image}/>
                 </TouchableOpacity>*/}
-            
+            <Image source={{uri: photo.uri}} style={styles.image}/>
             <TextInput
                 placeholder="Photo title"
                 value={title}
