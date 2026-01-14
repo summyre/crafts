@@ -149,14 +149,16 @@ const useScreenStyles = () => {
             fontSize: fontSizes.xxxl,
             fontWeight: '600',
             marginBottom: spacing.xl,
-            textAlign: 'center'
+            textAlign: 'center',
+            color: theme.colors.textDark
         },
         input: {
             borderWidth: 1,
             borderColor: theme.colors.border,
             padding: spacing.md,
             marginBottom: spacing.md,
-            borderRadius: borderRadius.md
+            borderRadius: borderRadius.md,
+            backgroundColor: theme.colors.card
         },
         button: {
             backgroundColor: theme.colors.primary,
@@ -179,6 +181,9 @@ const useScreenStyles = () => {
             fontSize: fontSizes.lg,
             marginBottom: spacing.xs,
             color: '#fff'
+        },
+        colour: {
+            color: theme.colors.textDark
         }
     });
 }

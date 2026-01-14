@@ -102,6 +102,7 @@ const useScreenStyles = () => {
             fontSize: fontSizes.xl,
             fontWeight: '600',
             marginBottom: spacing.lg,
+            color: theme.colors.textDark
         },
         card: {
             flexDirection: 'row',
@@ -125,6 +126,7 @@ const useScreenStyles = () => {
         name: {
             fontSize: fontSizes.lg,
             fontWeight: '600',
+            color: theme.colors.textDark
         },
         meta: {
             fontSize: fontSizes.sm,
@@ -133,7 +135,8 @@ const useScreenStyles = () => {
         },
         stock: {
             fontSize: fontSizes.sm,
-            fontWeight: '500'
+            fontWeight: '500',
+            color: theme.colors.textDark
         },
         filters: {
             flexDirection: 'row',

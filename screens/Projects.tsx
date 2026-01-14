@@ -111,7 +111,8 @@ const useScreenStyles = () =>{
         folderTitle: {
             fontWeight: 'bold',
             marginBottom: spacing.xs,
-            fontSize: fontSizes.xxl
+            fontSize: fontSizes.xxl,
+            color: theme.colors.textDark
         },
         status: {
             fontSize: fontSizes.sm,
